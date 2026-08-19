@@ -1,0 +1,13 @@
+<Solution>
+    <Folder Name="/src/">
+        <Project Path="src/SimpleFileServer.Application.Abstractions/SimpleFileServer.Application.Abstractions.csproj" />
+        <Project Path="src/SimpleFileServer.Application/SimpleFileServer.Application.csproj" />
+        <Project Path="src/SimpleFileServer.Domain/SimpleFileServer.Domain.csproj" />
+        <Project Path="src/SimpleFileServer.Infrastructure/SimpleFileServer.Infrastructure.csproj" />
+        <Project Path="src/SimpleFileServer.Web/SimpleFileServer.Web.csproj" />
+    </Folder>
+    <Folder Name="/tests/">
+        <Project Path="tests/SimpleFileServer.IntegrationTests/SimpleFileServer.IntegrationTests.csproj" />
+        <Project Path="tests/SimpleFileServer.UnitTests/SimpleFileServer.UnitTests.csproj" />
+    </Folder>
+</Solution>

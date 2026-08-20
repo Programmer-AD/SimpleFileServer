@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using SimpleFileServer.Web.ExceptionHandling;
+
 namespace SimpleFileServer.Web;
 
 public static class DependencyInjection
@@ -6,27 +9,34 @@ public static class DependencyInjection
     {
         services.AddHealthChecks();
 
-        services.AddCors(corsOptions =>
-        {
-            string[]? corsOrigins = config["CorsOrigins"]?
-                .Split(';')?
-                .Select(x => x.Trim())?
-                .Where(x => !string.IsNullOrEmpty(x))?
-                .ToArray();
-            if (corsOrigins == null || corsOrigins.Length == 0)
-            {
-                // No config - no cors policy
-                return;
-            }
+        services.AddCors(corsOptions => SetupCors(corsOptions, config));
 
-            corsOptions.AddDefaultPolicy(policyBuilder =>
-            {
-                policyBuilder
-                    .WithOrigins(corsOrigins)
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
-            });
+        services.AddProblemDetails();
+
+        services.AddExceptionHandler<CustomExceptionHandler>();
+    }
+
+    private static void SetupCors(CorsOptions corsOptions, IConfiguration config)
+    {
+        string[]? corsOrigins = config["CorsOrigins"]?
+            .Split(';')?
+            .Select(x => x.Trim())?
+            .Where(x => !string.IsNullOrEmpty(x))?
+            .ToArray();
+
+        if (corsOrigins == null || corsOrigins.Length == 0)
+        {
+            // No config - no cors policy
+            return;
+        }
+
+        corsOptions.AddDefaultPolicy(policyBuilder =>
+        {
+            policyBuilder
+                .WithOrigins(corsOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
         });
     }
 }

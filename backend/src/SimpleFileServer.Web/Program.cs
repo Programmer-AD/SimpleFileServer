@@ -62,7 +62,9 @@ public class Program
 
     private static void SetupApp(WebApplication app)
     {
-        // TODO: Exception handler
+        app.UseExceptionHandler();
+        // To display problem details for empty unsuccefful responses
+        app.UseStatusCodePages();
 
         app.UseCors();
         app.UseRouting();

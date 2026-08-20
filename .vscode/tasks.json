@@ -1,0 +1,128 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		// Group tasks
+		{
+			"label": "SimpleFileServer: watch all",
+			"dependsOn": [
+				"SimpleFileServer: dotnet watch",
+				"SimpleFileServer: npm start"
+			],
+			"dependsOrder": "parallel",
+			"presentation": {
+				"reveal": "never"
+			}
+		},
+		// Backend related tasks
+		{
+			"label": "SimpleFileServer: dotnet watch",
+			"type": "shell",
+			"command": "dotnet watch run",
+			"isBackground": true,
+			"runOptions": {
+				"instanceLimit": 1,
+				"instancePolicy": "terminateOldest"
+			},
+			"options": {
+				"cwd": "${workspaceFolder}\\backend\\src\\SimpleFileServer.Web",
+				"env": {
+					"DOTNET_WATCH_RESTART_ON_RUDE_EDIT": "1"
+				}
+			},
+			"windows": {
+				"command": "cmd.exe",
+				"args": [
+					"/c",
+					"dotnet watch run"
+				]
+			},
+			"problemMatcher": {
+				"base": "$msCompile",
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": {
+						"regexp": "File updated"
+					},
+					"endsPattern": {
+						"regexp": "Loaded \\d+ project|changes applied|Unable to apply changes|No managed code changes to apply"
+					}
+				}
+			},
+			"presentation": {
+				"panel": "shared",
+				"reveal": "always",
+				"group": "server-watch-group",
+			}
+		},
+		// Frontend related tasks
+		{
+			"label": "SimpleFileServer: npm start",
+			"type": "npm",
+			"script": "start",
+			"isBackground": true,
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"problemMatcher": {
+				"owner": "typescript",
+				"pattern": "$tsc",
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": {
+						"regexp": "Changes detected"
+					},
+					"endsPattern": {
+						"regexp": "bundle generation (complete|failed)"
+					}
+				}
+			},
+			"presentation": {
+				"panel": "shared",
+				"reveal": "always",
+				"group": "server-watch-group",
+			},
+		},
+		{
+			"label": "SimpleFileServer: npm test",
+			"type": "npm",
+			"script": "test",
+			"isBackground": true,
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"problemMatcher": {
+				"owner": "typescript",
+				"pattern": "$tsc",
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": {
+						"regexp": "Changes detected"
+					},
+					"endsPattern": {
+						"regexp": "bundle generation (complete|failed)"
+					}
+				}
+			}
+		},
+		// Docker compose tasks
+		{
+			"label": "SimpleFileServer: docker compose up",
+			"type": "shell",
+			"command": "docker-compose -p simple-file-server -f ./build/compose.yaml up --build -d",
+			"isBackground": true,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+			}
+		},
+		{
+			"label": "SimpleFileServer: docker compose down",
+			"type": "shell",
+			"command": "docker-compose -p simple-file-server -f ./build/compose.yaml down",
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+			}
+		}
+	]
+}

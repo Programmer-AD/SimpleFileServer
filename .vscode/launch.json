@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Start all as watch",
+            "type": "chrome",
+            "request": "launch",
+            "preLaunchTask": "SimpleFileServer: watch all",
+            "url": "http://localhost:4200/"
+        },
+        {
+            "name": ".NET Start Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/backend/src/SimpleFileServer.Web/SimpleFileServer.Web.csproj"
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processName": "SimpleFileServer.Web.exe"
+        },
+    ]
+}

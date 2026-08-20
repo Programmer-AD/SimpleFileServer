@@ -57,14 +57,19 @@ public class Program
         IServiceCollection services = builder.Services;
         services.AddInfrastructureServices();
         services.AddApplicationServices();
-        services.AddWebServices();
+        services.AddWebServices(config);
     }
 
     private static void SetupApp(WebApplication app)
     {
         // TODO: Exception handler
 
+        app.UseCors();
         app.UseRouting();
+
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
+        app.MapStaticAssets().ShortCircuit();
 
         app.MapHealthChecks("/health", new HealthCheckOptions()
         {

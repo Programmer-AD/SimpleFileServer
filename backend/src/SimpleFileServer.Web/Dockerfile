@@ -1,13 +1,28 @@
 ARG _DOTNET_VERSION=10.0
+ARG _NODE_VERSION=24
+
+FROM --platform=$BUILDPLATFORM node:${_NODE_VERSION}-alpine AS build-frontend
+
+COPY ./frontend /source
+WORKDIR /source
+
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
+
+RUN npx ng build --output-path /app
+
 
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:${_DOTNET_VERSION}-alpine AS build
 
 # For readability only
-ARG _PROJECT_PATH=./backend/src/SimpleFileServer.Web
+ARG _PROJECT_PATH=./src/SimpleFileServer.Web
 
 # The context is repository root
-COPY . /source
+COPY ./backend /source
 WORKDIR /source
+
+# Copy frontend app before build so MapStaticAssets would work fine
+COPY --from=build-frontend /app/browser ${_PROJECT_PATH}/wwwroot
 
 ARG BUILD_CONFIGURATION=Release
 

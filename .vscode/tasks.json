@@ -1,0 +1,51 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "SimpleFileServer: dotnet watch",
+			"type": "shell",
+			"command": "dotnet watch /property:GenerateFullPaths=true",
+			"isBackground": true,
+			"problemMatcher": "$msCompile",
+			"runOptions": {
+				"instanceLimit": 1,
+				"instancePolicy": "terminateOldest"
+			},
+			"options": {
+				"cwd": "${workspaceFolder}\\backend\\src\\SimpleFileServer.Web"
+			},
+			"windows": {
+				"command": "cmd.exe",
+				"args": [
+					"/c",
+					"dotnet watch"
+				]
+			},
+			"presentation": {
+				"panel": "new",
+				"reveal": "always",
+				"focus": true,
+				"clear": true
+			},
+		},
+		{
+			"label": "SimpleFileServer: docker compose up",
+			"type": "shell",
+			"command": "docker-compose -p simple-file-server -f ./build/compose.yaml up --build -d",
+			"isBackground": true,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+			}
+		},
+		{
+			"label": "SimpleFileServer: docker compose down",
+			"type": "shell",
+			"command": "docker-compose -p simple-file-server -f ./build/compose.yaml down",
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}",
+			}
+		}
+	]
+}

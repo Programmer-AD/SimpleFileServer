@@ -62,13 +62,13 @@ public class Program
 
     private static void SetupApp(WebApplication app)
     {
+        // TODO: Exception handler
+
         app.UseRouting();
 
         app.MapHealthChecks("/health", new HealthCheckOptions()
         {
             ResponseWriter = HealthCheckResultWriter.WriteResultAsync,
         });
-
-        app.MapControllers();
     }
 }

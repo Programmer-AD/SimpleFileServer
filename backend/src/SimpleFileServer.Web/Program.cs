@@ -63,7 +63,7 @@ public class Program
     private static void SetupApp(WebApplication app)
     {
         app.UseExceptionHandler();
-        // To display problem details for empty unsuccefful responses
+        // To display problem details for empty unsuccessful responses
         app.UseStatusCodePages();
 
         app.UseCors();

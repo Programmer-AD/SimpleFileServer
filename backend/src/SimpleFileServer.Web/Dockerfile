@@ -29,6 +29,7 @@ ARG BUILD_CONFIGURATION=Release
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
     dotnet publish ${_PROJECT_PATH} -c ${BUILD_CONFIGURATION} -p:UseAppHost=false -o /app
 
+
 FROM mcr.microsoft.com/dotnet/aspnet:${_DOTNET_VERSION}-alpine AS final
 
 COPY --from=build /app /app

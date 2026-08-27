@@ -11,7 +11,18 @@ public static class DependencyInjection
 
         services.AddCors(corsOptions => SetupCors(corsOptions, config));
 
-        services.AddProblemDetails();
+        services.AddProblemDetails(options =>
+        {
+            options.CustomizeProblemDetails = context =>
+            {
+                // For log based diagnostics
+                context.ProblemDetails.Extensions["requestId"] = context.HttpContext.TraceIdentifier;
+                context.ProblemDetails.Extensions["timestamp"] = DateTime.UtcNow.ToString("O");
+
+                // Remove long but useless extension (it is not part of logs)
+                context.ProblemDetails.Extensions.Remove("traceId");
+            };
+        });
         services.AddExceptionHandler<CustomExceptionHandler>();
 
         services.AddOpenApi();

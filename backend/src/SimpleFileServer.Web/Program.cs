@@ -3,6 +3,7 @@ using NLog;
 using NLog.Web;
 using SimpleFileServer.Application;
 using SimpleFileServer.Infrastructure;
+using SimpleFileServer.Web.Endpoints;
 using SimpleFileServer.Web.HealthChecks;
 
 namespace SimpleFileServer.Web;
@@ -83,5 +84,7 @@ public class Program
             app.MapOpenApi();
             app.UseSwaggerUI(o => o.SwaggerEndpoint("/openapi/v1.json", "SimpleFileServer"));
         }
+
+        app.MapAppEndpoints();
     }
 }

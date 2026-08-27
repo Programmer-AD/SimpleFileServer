@@ -77,5 +77,11 @@ public class Program
         {
             ResponseWriter = HealthCheckResultWriter.WriteResultAsync,
         });
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
+            app.UseSwaggerUI(o => o.SwaggerEndpoint("/openapi/v1.json", "SimpleFileServer"));
+        }
     }
 }

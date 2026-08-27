@@ -12,8 +12,9 @@ public static class DependencyInjection
         services.AddCors(corsOptions => SetupCors(corsOptions, config));
 
         services.AddProblemDetails();
-
         services.AddExceptionHandler<CustomExceptionHandler>();
+
+        services.AddOpenApi();
     }
 
     private static void SetupCors(CorsOptions corsOptions, IConfiguration config)

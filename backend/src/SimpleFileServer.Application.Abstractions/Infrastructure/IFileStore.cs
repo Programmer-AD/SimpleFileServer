@@ -4,7 +4,7 @@ public interface IFileStore
 {
     Task<string> StoreAsync(Stream file);
 
-    Task<Stream?> GetContentAsync(string location);
+    Stream? GetContent(string location);
 
-    Task DeleteAsync(string location);
+    void Delete(string location);
 }

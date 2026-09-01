@@ -1,17 +1,46 @@
 using Microsoft.Extensions.Options;
+using SimpleFileServer.Application.Abstractions.Configs;
 using SimpleFileServer.Application.Abstractions.Infrastructure;
-using SimpleFileServer.Infrastructure.Configs;
 
 namespace SimpleFileServer.Infrastructure.Implementations;
 
-#warning "Not implemened"
 internal class FileStore(
     IOptions<FileStoreOptions> options
 ) : IFileStore
 {
-    public Task<string> StoreAsync(Stream file)
-        => throw new NotImplementedException();
+    public async Task<string> StoreAsync(Stream file)
+    {
+        string location = GetRandomFreeLocation();
 
-    public Task<Stream?> GetContentAsync(string location) => throw new NotImplementedException();
-    public Task DeleteAsync(string location) => throw new NotImplementedException();
+        using FileStream stream = File.OpenWrite(location);
+        await file.CopyToAsync(stream);
+
+        return location;
+    }
+
+    public Stream? GetContent(string location)
+    {
+        if (!File.Exists(location))
+        {
+            return null;
+        }
+
+        return File.OpenRead(location);
+    }
+
+    public void Delete(string location)
+    {
+        File.Delete(location);
+    }
+
+    private string GetRandomFreeLocation()
+    {
+        string filePath;
+        do
+        {
+            filePath = Path.Combine(options.Value.StorageFolderPath, Path.GetRandomFileName());
+        } while (File.Exists(filePath));
+
+        return filePath;
+    }
 }

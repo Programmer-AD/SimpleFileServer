@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using SimpleFileServer.Application.Abstractions.Configs;
 using SimpleFileServer.Application.Abstractions.Infrastructure;
-using SimpleFileServer.Infrastructure.Configs;
 using SimpleFileServer.Infrastructure.Implementations;
 
 namespace SimpleFileServer.Infrastructure;

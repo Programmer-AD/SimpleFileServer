@@ -44,7 +44,7 @@ internal class DomainFileService(
     {
         DomainFile file = await GetAsync(id);
 
-        Stream content = await fileStore.GetContentAsync(file.FileLocation)
+        Stream content = fileStore.GetContent(file.FileLocation)
             ?? throw DomainException.GenericNotFound("physical file", id);
 
         return content;
@@ -61,6 +61,14 @@ internal class DomainFileService(
 
     public async Task DeleteAsync(Guid id)
     {
+        DomainFile? file = await domainFileRepository.GetAsync(id);
+        if (file == null)
+        {
+            return;
+        }
+
+        fileStore.Delete(file.FileLocation);
+
         await domainFileRepository.DeleteAsync(id);
     }
 }

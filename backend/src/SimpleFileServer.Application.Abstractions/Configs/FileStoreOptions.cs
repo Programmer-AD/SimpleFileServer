@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SimpleFileServer.Infrastructure.Configs;
+namespace SimpleFileServer.Application.Abstractions.Configs;
 
-public record class FileStoreOptions
+public class FileStoreOptions
 {
     [Required]
     public string StorageFolderPath { get; set; } = null!;

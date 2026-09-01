@@ -11,7 +11,7 @@ public class DomainException : Exception
     /// <param name="entityType">Human readable entity type.</param>
     /// <param name="id">The id of entity which was searched.</param>
     /// <returns>Domain exception with "generic not found" type.</returns>
-    public static DomainException GenericNotFound(string entityType, Guid id)
+    public static DomainException GenericNotFound<T>(string entityType, T id)
         => new(DomainExceptionTypes.GenericNotFound, $"The {entityType} with id \"{id}\" was not found.");
 
     /// <summary>

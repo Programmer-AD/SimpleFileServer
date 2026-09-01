@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using NLog;
 using NLog.Web;
 using SimpleFileServer.Application;
+using SimpleFileServer.Application.Abstractions.Infrastructure;
 using SimpleFileServer.Infrastructure;
 using SimpleFileServer.Web.Endpoints;
 using SimpleFileServer.Web.HealthChecks;
@@ -24,7 +25,7 @@ public class Program
             WebApplication app = builder.Build();
             SetupApp(app);
 
-            // Init before start goes here
+            await InitAppAsync(app);
 
             await app.RunAsync();
         }
@@ -33,7 +34,6 @@ public class Program
         {
             // This exception can occur when manipulating EF Core migrations
             // So we suppress it's logging on debug
-            // P.S. Kept as example only, not really needed at current moment.
         }
 #endif
         catch (Exception exception)
@@ -86,5 +86,12 @@ public class Program
         }
 
         app.MapAppEndpoints();
+    }
+
+    private static async Task InitAppAsync(WebApplication app)
+    {
+        using IServiceScope scope = app.Services.CreateScope();
+        IDatabaseService dbService = scope.ServiceProvider.GetRequiredService<IDatabaseService>();
+        await dbService.EnsureInitializedAsync();
     }
 }

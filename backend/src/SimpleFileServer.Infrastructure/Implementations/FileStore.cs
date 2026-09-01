@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
-using SimpleFileServer.Application.Abstractions.Configs;
 using SimpleFileServer.Application.Abstractions.Infrastructure;
+using SimpleFileServer.Infrastructure.Configs;
 
 namespace SimpleFileServer.Infrastructure.Implementations;
 

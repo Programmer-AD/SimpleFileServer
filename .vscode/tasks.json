@@ -123,6 +123,57 @@
 			"options": {
 				"cwd": "${workspaceFolder}",
 			}
+		},
+		// .NET General tasks
+		{
+			"label": "SimpleFileServer: dotnet format",
+			"type": "shell",
+			"command": "dotnet format --severity info",
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}/backend",
+			}
+		},
+		{
+			"label": "SimpleFileServer: restore tools",
+			"type": "shell",
+			"command": "dotnet tool restore",
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}/backend",
+			}
+		},
+		// EF Tasks
+		{
+			"label": "SimpleFileServer: add database migration",
+			"type": "shell",
+			"command": "dotnet ef migrations add -p src\\SimpleFileServer.Infrastructure -s src\\SimpleFileServer.Web ${input:migrationName}",
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}/backend",
+			},
+			"dependsOn": [
+				"SimpleFileServer: restore tools"
+			],
+		},
+		{
+			"label": "SimpleFileServer: remove latest database migration",
+			"type": "shell",
+			"command": "dotnet ef migrations remove -p src\\SimpleFileServer.Infrastructure -s src\\SimpleFileServer.Web",
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}/backend",
+			},
+			"dependsOn": [
+				"SimpleFileServer: restore tools"
+			]
+		},
+	],
+	"inputs": [
+		{
+			"id": "migrationName",
+			"description": "Database migration name:",
+			"type": "promptString"
 		}
 	]
 }

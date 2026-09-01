@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using SimpleFileServer.Web.ExceptionHandling;
+using SimpleFileServer.Web.HealthChecks;
 
 namespace SimpleFileServer.Web;
 
@@ -7,7 +8,8 @@ public static class DependencyInjection
 {
     public static void AddWebServices(this IServiceCollection services, IConfiguration config)
     {
-        services.AddHealthChecks();
+        services.AddHealthChecks()
+            .AddCheck<DatabaseHealthCheck>("Database");
 
         services.AddCors(corsOptions => SetupCors(corsOptions, config));
 

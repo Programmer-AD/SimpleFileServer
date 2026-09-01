@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SimpleFileServer.Application.Abstractions.Configs;
+namespace SimpleFileServer.Infrastructure.Configs;
 
 public class FileStoreOptions
 {

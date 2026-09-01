@@ -1,6 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using SimpleFileServer.Application.Abstractions.Configs;
+using Microsoft.Extensions.Options;
 using SimpleFileServer.Application.Abstractions.Infrastructure;
+using SimpleFileServer.Infrastructure.Configs;
+using SimpleFileServer.Infrastructure.EF;
 using SimpleFileServer.Infrastructure.Implementations;
 
 namespace SimpleFileServer.Infrastructure;
@@ -11,17 +14,29 @@ public static class DependencyInjection
     {
         AddConfigs(services);
         AddImplementations(services);
+        AddAppDbContext(services);
     }
 
     private static void AddImplementations(IServiceCollection services)
     {
+        services.AddScoped<IDatabaseService, DatabaseService>();
+        services.AddScoped<IDomainFileRepository, DomainFileRepository>();
         services.AddSingleton<IFileStore, FileStore>();
-        services.AddSingleton<IDomainFileRepository, DomainFileRepository>();
     }
 
     private static void AddConfigs(IServiceCollection services)
     {
         services.AddOptionsWithValidation<FileStoreOptions>("Infrastructure:FileStore");
+        services.AddOptionsWithValidation<DatabaseOptions>("Infrastructure:Database");
+    }
+
+    private static void AddAppDbContext(this IServiceCollection services)
+    {
+        services.AddDbContext<AppDbContext>((services, options) =>
+        {
+            IOptions<DatabaseOptions> dbOptions = services.GetRequiredService<IOptions<DatabaseOptions>>();
+            options.UseSqlite(dbOptions.Value.ConnectionString);
+        });
     }
 
     private static void AddOptionsWithValidation<TOptions>(this IServiceCollection services, string sectionName)
@@ -32,5 +47,4 @@ public static class DependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
     }
-
 }

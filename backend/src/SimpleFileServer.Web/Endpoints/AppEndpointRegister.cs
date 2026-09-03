@@ -6,7 +6,7 @@ internal static class AppEndpointRegister
 {
     public static void MapAppEndpoints(this WebApplication app)
     {
-        RouteGroupBuilder rootGroup = app.MapGroup("");
+        RouteGroupBuilder rootGroup = app.MapGroup("api");
         // No need for antiforgery since we do not use cookie auth
         // If it is not disabled - Swagger UI fails on file uploads
         rootGroup.DisableAntiforgery();

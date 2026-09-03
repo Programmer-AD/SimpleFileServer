@@ -67,7 +67,6 @@ public class Program
         // To display problem details for empty unsuccessful responses
         app.UseStatusCodePages();
 
-        app.UseCors();
         app.UseRouting();
 
         app.UseDefaultFiles();

@@ -7,7 +7,7 @@ COPY ./frontend /source
 WORKDIR /source
 
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci
+    npm ci --loglevel verbose --audit=false --fund=false
 
 RUN npx ng build --output-path /app
 
@@ -34,6 +34,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:${_DOTNET_VERSION}-alpine AS final
 
 COPY --from=build /app /app
 WORKDIR /app
+
+# Setup storage volume (must go befor user switch)
+RUN mkdir -p /storage && chown -R $APP_UID:$APP_UID /storage
+VOLUME [ "/storage" ]
+ENV Infrastructure__FileStore__StorageFolderPath="/storage"
+ENV Infrastructure__Database__ConnectionString="Data Source=/storage/data.db"
 
 # Switch to non-privileged user (defined in dotnet base image)
 USER $APP_UID

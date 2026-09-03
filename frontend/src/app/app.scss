@@ -1,0 +1,39 @@
+header {
+    display: flex;
+    border-bottom: solid 1px var(--border-color);
+    padding: 10px;
+    background-color: var(--secondary-color);
+
+    .header-text {
+        flex: 1;
+        font-size: x-large;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow-x: hidden;
+    }
+}
+
+main {
+    padding: 10px;
+
+    &>* {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+footer {
+    margin-top: 20px;
+    padding: 10px;
+    border-top: solid 1px var(--border-color);
+
+    .github-link {
+        color: var(--text-color);
+    }
+
+    .mini-footer {
+        font-style: italic;
+        font-size: small;
+    }
+}

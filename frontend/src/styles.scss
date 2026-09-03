@@ -1,1 +1,152 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* CSS color variables */
+:root {
+    --background-color: white;
+    --text-color: black;
+    --border-color: gray;
+    --error-color: #ff7777;
+    --secondary-color: lightgray;
+
+    --controls-background-color: #6666ff;
+    --controls-hover-background-color: #7777ff;
+    --controls-active-background-color: #8888ff;
+    --controls-disabled-background-color: gray;
+    --controls-text-color: white;
+}
+
+/* Global style defaults */
+:root {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+    font-family: sans-serif;
+}
+
+body {
+    margin: 0px;
+}
+
+button {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+
+    background-color: var(--controls-background-color);
+    color: var(--controls-text-color);
+
+    &:hover {
+        background-color: var(--controls-hover-background-color);
+    }
+
+    &:active {
+        background-color: var(--controls-active-background-color);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        background-color: var(--controls-disabled-background-color);
+    }
+}
+
+@media print {
+    button {
+        display: none;
+    }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 5px 0px;
+}
+
+input {
+    width: 400px;
+    border-radius: 5px;
+    border-color: var(--border-color);
+    padding: 5px;
+    margin: 0px;
+
+    &[type=file] {
+        width: 200px;
+        padding: 0px;
+    }
+}
+
+/* Shared classes */
+.error-message-block {
+    background-color: var(--error-color);
+    padding: 5px;
+    margin-top: 5px;
+    border-radius: 10px;
+    border: solid 1px var(--border-color);
+}
+
+.grid-data {
+    max-height: 400px;
+    overflow-y: auto;
+    border-collapse: collapse;
+
+    .header-row {
+        background-color: var(--controls-background-color);
+        color: var(--controls-text-color);
+    }
+
+    .row {
+        border: 1px solid var(--border-color);
+
+        &:hover {
+            background-color: var(--secondary-color);
+        }
+    }
+
+    td,
+    th {
+        padding: 5px;
+        border: 1px solid var(--border-color);
+    }
+}
+
+@media print {
+    .grid-data {
+        max-height: none;
+    }
+}
+
+.form-row {
+    margin: 5px 0px;
+
+    label {
+        display: block;
+        margin-left: 2px;
+
+        &::after {
+            content: ":";
+        }
+    }
+}
+
+.button-container {
+    display: flex;
+    gap: 5px;
+    flex-direction: row;
+}
+
+@media screen and (max-width: 600px) {
+    .button-container {
+        flex-direction: column;
+    }
+}
+
+.align-right {
+    text-align: right;
+}
+
+.align-left {
+    text-align: left;
+}

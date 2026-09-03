@@ -1,0 +1,19 @@
+.rename-file-form-container {
+    max-width: 600px;
+    margin: 5px auto;
+    text-align: left;
+}
+
+.rename-file-form-names {
+    margin: 10px 0px;
+}
+
+.file-upload-container {
+    display: flex;
+    gap: 5px;
+    margin: 10px 0px;
+    padding: 10px;
+    background-color: var(--secondary-color);
+    border: solid 1px var(--border-color);
+    border-radius: 10px;
+}

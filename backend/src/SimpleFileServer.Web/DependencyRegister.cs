@@ -7,6 +7,8 @@ public static class DependencyInjection
 {
     public static void AddWebServices(this IServiceCollection services, IConfiguration config)
     {
+        services.AddValidation();
+
         services.AddHealthChecks()
             .AddCheck<DatabaseHealthCheck>("Database");
 

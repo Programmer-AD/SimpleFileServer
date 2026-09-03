@@ -30,7 +30,8 @@ internal class DatabaseService(
     private void EnsureParentFolderExists()
     {
         var connectionStringBuilder = new SqliteConnectionStringBuilder(dbOptions.Value.ConnectionString);
-        // The only exception is when source is ":memory:" which can be used in integrationt tests
+
+        // No need to check for directory when source is ":memory:" which could be used in integration tests
         if (!connectionStringBuilder.DataSource.StartsWith(':'))
         {
             string? dbDirectory = Path.GetDirectoryName(connectionStringBuilder.DataSource);

@@ -24,8 +24,6 @@ export class HomePage {
             return [];
         }
 
-        console.dir(this.fileListResource.value().files);
-
         const files = this.fileListResource.value().files.map(file => (<FileRow>{
             ...file,
             size: (file.size / 1024).toFixed(2) + " KB",
@@ -37,12 +35,16 @@ export class HomePage {
     protected renamedFile = signal<FileRow | undefined>(undefined);
     protected renamedFileNewName = linkedSignal(() => this.renamedFile()?.name ?? "");
     protected canSaveRename = computed(() => {
+        const newNameMaxLength = 250;
         const invalidChars = /[\"\<\>\|\:\*\?\\\/\t\n\v\f\r]/gm;
 
         const renamedFileOldName = this.renamedFile()?.name;
         const renamedFileNewName = this.renamedFileNewName().trim();
 
-        return renamedFileNewName !== "" && renamedFileNewName !== renamedFileOldName && renamedFileNewName.match(invalidChars) === null;
+        return renamedFileNewName !== ""
+            && renamedFileNewName !== renamedFileOldName
+            && renamedFileNewName.length < newNameMaxLength
+            && renamedFileNewName.match(invalidChars) === null;
     });
 
     protected async onUploadFileClick() {

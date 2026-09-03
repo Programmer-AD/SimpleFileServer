@@ -34,24 +34,31 @@ internal class CustomExceptionHandler(
     {
         var domainException = exception as DomainException;
 
-        int statusCode = 500;
-        if (!string.IsNullOrEmpty(domainException?.TypeName))
-        {
-            if (domainException.TypeName.StartsWith(DomainExceptionTypes.GenericNotFound))
-            {
-                statusCode = 404;
-            }
-            else if (domainException.TypeName.StartsWith(DomainExceptionTypes.GenericAccessDenied))
-            {
-                statusCode = 403;
-            }
-        }
-
         return new ProblemDetails()
         {
-            Status = statusCode,
+            Status = GetResultStatusCode(domainException),
             Type = domainException?.TypeName,
             Detail = domainException?.Details ?? "Internal server error occured",
         };
+    }
+
+    private static int GetResultStatusCode(DomainException? domainException)
+    {
+        if (string.IsNullOrEmpty(domainException?.TypeName))
+        {
+            return 500;
+        }
+
+        if (domainException.TypeName.StartsWith(DomainExceptionTypes.GenericNotFound))
+        {
+            return 404;
+        }
+
+        if (domainException.TypeName.StartsWith(DomainExceptionTypes.GenericAccessDenied))
+        {
+            return 403;
+        }
+
+        return 500;
     }
 }

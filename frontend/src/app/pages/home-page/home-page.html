@@ -1,0 +1,59 @@
+<div>
+    <div class="file-upload-container">
+        <input type="file" #uploadFileInput />
+        <button (click)="onUploadFileClick()">Upload</button>
+    </div>
+    <div>
+        @if (fileListResource.isLoading()){
+        <div>Loading...</div>
+        } @else {
+        <table class="grid-data">
+            <tr class="header-row">
+                <th>Name</th>
+                <th>Size</th>
+                <th>Created at</th>
+                <th></th>
+            </tr>
+            @for (fileRow of fileList(); track fileRow.id){
+            <tr class="row">
+                <td class="align-left">{{ fileRow.name }}</td>
+                <td class="align-right">{{ fileRow.size }}</td>
+                <td class="align-right">{{ fileRow.createdAt | date : 'HH:mm dd-MM-yyyy' }}</td>
+                <td>
+                    <div class="button-container">
+                        <button (click)="onDownloadFileClick(fileRow)">Download</button>
+                        <button (click)="onRenameFileClick(fileRow)">Rename</button>
+                        <button (click)="onDeleteFileClick(fileRow)">Delete</button>
+                    </div>
+                </td>
+            </tr>
+            } @empty {
+            <div>Empty</div>
+            }
+        </table>
+        }
+    </div>
+</div>
+
+@let renamedFileObj = renamedFile();
+@if (renamedFileObj !== undefined){
+<app-modal-dialog-component (closing)="onRenameClosingClick()">
+    <h2>Rename file</h2>
+    <div class="rename-file-form-container">
+        <div class="rename-file-form-names">
+            <div>Old name: {{renamedFileObj.name}}</div>
+            <div>
+                <label>New name:</label>
+                <app-short-text-input-component [(value)]="renamedFileNewName"></app-short-text-input-component>
+            </div>
+        </div>
+        @if (!canSaveRename()){
+        <div class="error-message-block">
+            New file name must not be same as old, empty and must not contain invalid characters. (Most of special characters are invalid).
+        </div>
+        }
+
+    </div>
+    <button (click)="onRenameSaveClick()" [disabled]="!canSaveRename()">Save</button>
+</app-modal-dialog-component>
+}

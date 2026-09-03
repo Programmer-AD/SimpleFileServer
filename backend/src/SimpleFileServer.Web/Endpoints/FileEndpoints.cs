@@ -35,7 +35,7 @@ internal static class FileEndpoints
         return TypedResults.Ok(new FileListModel([.. files.Select(x => x.ToFileInfoModel())]));
     }
 
-    public static async Task<FileStreamHttpResult> DownloadAsync(Guid id, IDomainFileService fileService)
+    public static async Task<FileStreamHttpResult> GetContentAsync(Guid id, IDomainFileService fileService)
     {
         DomainFile file = await fileService.GetAsync(id);
         Stream contentStream = await fileService.GetContentAsync(id);

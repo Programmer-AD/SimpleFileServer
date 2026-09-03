@@ -17,15 +17,15 @@ internal static class AppEndpointRegister
     private static void MapFileEndpoints(IEndpointRouteBuilder routeBuilder)
     {
         RouteGroupBuilder fileGroup = routeBuilder.MapGroup("files");
-        fileGroup.MapPost("upload", FileEndpoints.UploadAsync);
-        fileGroup.MapGet("all", FileEndpoints.GetAllAsync);
+        fileGroup.MapPost("", FileEndpoints.UploadAsync);
+        fileGroup.MapGet("", FileEndpoints.GetAllAsync);
 
         RouteGroupBuilder fileItemGroup = fileGroup.MapGroup("{id}");
-        fileItemGroup.MapGet("download", FileEndpoints.DownloadAsync)
+        fileItemGroup.MapGet("content", FileEndpoints.GetContentAsync)
             .Produces<Stream>(200, contentType: MediaTypeNames.Application.Octet)
             .ProducesProblem(404);
-        fileItemGroup.MapPut("rename", FileEndpoints.RenameAsync)
+        fileItemGroup.MapPatch("rename", FileEndpoints.RenameAsync)
             .ProducesProblem(404);
-        fileItemGroup.MapDelete("delete", FileEndpoints.DeleteAsync);
+        fileItemGroup.MapDelete("", FileEndpoints.DeleteAsync);
     }
 }

@@ -4,6 +4,7 @@ using NLog.Web;
 using SimpleFileServer.Application;
 using SimpleFileServer.Application.Abstractions.Infrastructure;
 using SimpleFileServer.Infrastructure;
+using SimpleFileServer.Web.Authentication;
 using SimpleFileServer.Web.Endpoints;
 using SimpleFileServer.Web.HealthChecks;
 
@@ -68,6 +69,9 @@ public class Program
         app.UseStatusCodePages();
 
         app.UseRouting();
+
+        // Must go before authentication
+        app.UseMiddleware<AuthenticationCookieBridgeMiddleware>();
 
         app.UseAuthentication();
         app.UseAuthorization();

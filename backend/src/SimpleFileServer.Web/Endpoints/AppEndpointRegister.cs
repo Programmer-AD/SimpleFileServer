@@ -14,6 +14,7 @@ internal static class AppEndpointRegister
             .RequireAuthorization();
 
         MapFileEndpoints(rootGroup);
+        MapAuthEndpoints(rootGroup);
     }
 
     private static void MapFileEndpoints(IEndpointRouteBuilder routeBuilder)
@@ -29,5 +30,11 @@ internal static class AppEndpointRegister
         fileItemGroup.MapPatch("rename", FileEndpoints.RenameAsync)
             .ProducesProblem(404);
         fileItemGroup.MapDelete("", FileEndpoints.DeleteAsync);
+    }
+
+    private static void MapAuthEndpoints(IEndpointRouteBuilder routeBuilder)
+    {
+        RouteGroupBuilder authGroup = routeBuilder.MapGroup("auth");
+        authGroup.MapGet("cookies", (Delegate)AuthEndpoints.GetAuthCookiesAsync);
     }
 }

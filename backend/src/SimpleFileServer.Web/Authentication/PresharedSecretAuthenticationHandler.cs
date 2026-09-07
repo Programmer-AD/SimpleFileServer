@@ -27,8 +27,7 @@ internal class PresharedSecretAuthenticationHandler : AuthenticationHandler<Pres
 
     private AuthenticateResult HandleAuthenticate()
     {
-
-        if (AuthenticationHeaderValue.TryParse(Request.Headers.Authorization, out AuthenticationHeaderValue? authenticationHeader)
+        if (!AuthenticationHeaderValue.TryParse(Request.Headers.Authorization, out AuthenticationHeaderValue? authenticationHeader)
             || authenticationHeader == null)
         {
             return AuthenticateResult.Fail("Authentication header is not present or has incorrect format.");

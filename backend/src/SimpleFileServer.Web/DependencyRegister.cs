@@ -29,6 +29,8 @@ public static class DependencyInjection
 
         services.AddOpenApi();
 
+        services.AddSingleton<AuthenticationCookieBridgeMiddleware>();
+
         services.AddAuthentication()
             .AddScheme<PresharedSecretAuthenticationHandlerOptions, PresharedSecretAuthenticationHandler>(
                 PresharedSecretAuthenticationHandler.AuthenticationScheme,

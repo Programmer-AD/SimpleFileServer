@@ -1,3 +1,4 @@
+using SimpleFileServer.Web.Authentication;
 using SimpleFileServer.Web.ExceptionHandling;
 using SimpleFileServer.Web.HealthChecks;
 
@@ -27,5 +28,30 @@ public static class DependencyInjection
         services.AddExceptionHandler<CustomExceptionHandler>();
 
         services.AddOpenApi();
+
+        services.AddAuthentication()
+            .AddScheme<SubnetBasedAuthenticationHandlerOptions, SubnetBasedAuthenticationHandler>(
+                SubnetBasedAuthenticationHandler.AuthenticationScheme,
+                options =>
+                {
+                    string[]? rawAllowedSubnets = config.GetSection("Authentication:AllowedSubnets").Get<string[]>();
+                    if (rawAllowedSubnets == null)
+                    {
+                        return;
+                    }
+
+                    var parsedSubnets = rawAllowedSubnets
+                        .Select(rawValue => (rawValue, parsedValue: AllowedSubnet.TryParse(rawValue, out AllowedSubnet? result) ? result : null))
+                        .ToList();
+                    var incorrectSubnets = parsedSubnets.Where(x => x.parsedValue == null).Select(x => x.rawValue).ToList();
+                    if (incorrectSubnets.Count > 0)
+                    {
+                        throw new ApplicationException($"Some allowed subnets have incorrect format. {string.Join(',', incorrectSubnets.Select(x => $"\"{x}\""))}");
+                    }
+
+                    options.AllowedSubnets.AddRange(parsedSubnets.Select(x => x.parsedValue!));
+                });
+
+        services.AddAuthorization();
     }
 }

@@ -6,12 +6,17 @@ internal static class AppEndpointRegister
 {
     public static void MapAppEndpoints(this WebApplication app)
     {
-        RouteGroupBuilder rootGroup = app.MapGroup("api");
-        // No need for antiforgery since we do not use cookie auth
-        // If it is not disabled - Swagger UI fails on file uploads
-        rootGroup.DisableAntiforgery();
+        // If antiforgery is not disabled - Swagger UI fails on file uploads
+        RouteGroupBuilder rootGroup = app.MapGroup("api")
+            .DisableAntiforgery()
+            .RequireAuthorization()
+            .ProducesProblem(401);
 
         MapFileEndpoints(rootGroup);
+
+        RouteGroupBuilder noAuthGroup = app.MapGroup("api")
+            .AllowAnonymous();
+        MapAuthEndpoints(noAuthGroup);
     }
 
     private static void MapFileEndpoints(IEndpointRouteBuilder routeBuilder)
@@ -27,5 +32,16 @@ internal static class AppEndpointRegister
         fileItemGroup.MapPatch("rename", FileEndpoints.RenameAsync)
             .ProducesProblem(404);
         fileItemGroup.MapDelete("", FileEndpoints.DeleteAsync);
+    }
+
+    private static void MapAuthEndpoints(IEndpointRouteBuilder routeBuilder)
+    {
+        RouteGroupBuilder authGroup = routeBuilder.MapGroup("auth");
+        authGroup.MapGet("cookies", (Delegate)AuthEndpoints.GetAuthCookiesAsync)
+            .RequireAuthorization()
+            .ProducesProblem(401);
+
+        authGroup.MapDelete("cookies", (Delegate)AuthEndpoints.DeleteAuthCookiesAsync)
+            .AllowAnonymous();
     }
 }

@@ -1,3 +1,4 @@
+using SimpleFileServer.Web.Authentication;
 using SimpleFileServer.Web.ExceptionHandling;
 using SimpleFileServer.Web.HealthChecks;
 
@@ -27,5 +28,23 @@ public static class DependencyInjection
         services.AddExceptionHandler<CustomExceptionHandler>();
 
         services.AddOpenApi();
+
+        services.AddSingleton<AuthenticationCookieBridgeMiddleware>();
+
+        services.AddAuthentication()
+            .AddScheme<PresharedSecretAuthenticationHandlerOptions, PresharedSecretAuthenticationHandler>(
+                PresharedSecretAuthenticationHandler.AuthenticationScheme,
+                options =>
+                {
+                    string? presharedSecret = config["Authentication:PresharedSecret"];
+                    if (string.IsNullOrEmpty(presharedSecret))
+                    {
+                        throw new ApplicationException($"Preshared secret is empty or missing. Please configure it.");
+                    }
+
+                    options.PresharedSecret = presharedSecret;
+                });
+
+        services.AddAuthorization();
     }
 }

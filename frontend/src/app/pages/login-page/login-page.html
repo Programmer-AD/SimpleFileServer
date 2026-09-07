@@ -1,0 +1,12 @@
+<div class="page-container">
+    @if (showAuthFailedError()){
+    <div class="error-message-block">
+        Authentication failed, please validate the secret and try again.
+    </div>
+    }
+    <div class="form-row">
+        <label>Preshared secret value</label>
+        <app-password-input-component [(value)]="secretValue" inputType="password" />
+    </div>
+    <button (click)="onLoginClick()">Login</button>
+</div>

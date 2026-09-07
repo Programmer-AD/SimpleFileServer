@@ -30,26 +30,17 @@ public static class DependencyInjection
         services.AddOpenApi();
 
         services.AddAuthentication()
-            .AddScheme<SubnetBasedAuthenticationHandlerOptions, SubnetBasedAuthenticationHandler>(
-                SubnetBasedAuthenticationHandler.AuthenticationScheme,
+            .AddScheme<PresharedSecretAuthenticationHandlerOptions, PresharedSecretAuthenticationHandler>(
+                PresharedSecretAuthenticationHandler.AuthenticationScheme,
                 options =>
                 {
-                    string[]? rawAllowedSubnets = config.GetSection("Authentication:AllowedSubnets").Get<string[]>();
-                    if (rawAllowedSubnets == null)
+                    string? presharedSecret = config["Authentication:PresharedSecret"];
+                    if (string.IsNullOrEmpty(presharedSecret))
                     {
-                        return;
+                        throw new ApplicationException($"Preshared secret is empty or missing. Please configure it.");
                     }
 
-                    var parsedSubnets = rawAllowedSubnets
-                        .Select(rawValue => (rawValue, parsedValue: AllowedSubnet.TryParse(rawValue, out AllowedSubnet? result) ? result : null))
-                        .ToList();
-                    var incorrectSubnets = parsedSubnets.Where(x => x.parsedValue == null).Select(x => x.rawValue).ToList();
-                    if (incorrectSubnets.Count > 0)
-                    {
-                        throw new ApplicationException($"Some allowed subnets have incorrect format. {string.Join(',', incorrectSubnets.Select(x => $"\"{x}\""))}");
-                    }
-
-                    options.AllowedSubnets.AddRange(parsedSubnets.Select(x => x.parsedValue!));
+                    options.PresharedSecret = presharedSecret;
                 });
 
         services.AddAuthorization();

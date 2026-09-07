@@ -9,7 +9,7 @@ public static class AuthEndpoints
     ///     Puts current authentication header value to HttpOnly cookies.
     ///     This endpoint is used by frontend to prevent XSS stealing of data.
     /// </summary>
-    public static async Task<Ok> GetAuthCookiesAsync(HttpContext httpContext)
+    public static async Task<NoContent> GetAuthCookiesAsync(HttpContext httpContext)
     {
         Dictionary<string, string> authCookies = SplitCookieHandler.ToSplitCookies(WebConstants.AuthBridgeCookieName, httpContext.Request.Headers.Authorization.ToString());
 
@@ -23,6 +23,19 @@ public static class AuthEndpoints
             });
         }
 
-        return TypedResults.Ok();
+        return TypedResults.NoContent();
+    }
+
+    public static async Task<NoContent> DeleteAuthCookiesAsync(HttpContext httpContext)
+    {
+        IEnumerable<string> cookieKeysToDelete = httpContext.Request.Cookies
+            .Select(cookie => cookie.Key)
+            .Where(key => key.StartsWith(WebConstants.AuthBridgeCookieName));
+        foreach (string cookieKey in cookieKeysToDelete)
+        {
+            httpContext.Response.Cookies.Delete(cookieKey);
+        }
+
+        return TypedResults.NoContent();
     }
 }

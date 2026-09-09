@@ -7,7 +7,8 @@ namespace SimpleFileServer.Application.Services;
 
 internal class DomainFileService(
     IDomainFileRepository domainFileRepository,
-    IFileStore fileStore
+    IFileStore fileStore,
+    TimeProvider timeProvider
 ) : IDomainFileService
 {
     public async Task<Guid> CreateAsync(string name, Stream createFile)
@@ -17,7 +18,7 @@ internal class DomainFileService(
         var domainFile = new DomainFile
         {
             Name = name,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
             FileLocation = location,
             Size = createFile.Length,
         };

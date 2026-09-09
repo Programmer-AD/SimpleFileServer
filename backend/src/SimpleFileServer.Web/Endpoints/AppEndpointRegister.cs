@@ -14,9 +14,8 @@ internal static class AppEndpointRegister
 
         MapFileEndpoints(rootGroup);
 
-        RouteGroupBuilder noAuthGroup = app.MapGroup("api")
-            .AllowAnonymous();
-        MapAuthEndpoints(noAuthGroup);
+        RouteGroupBuilder customAuthGroup = app.MapGroup("api");
+        MapAuthEndpoints(customAuthGroup);
     }
 
     private static void MapFileEndpoints(IEndpointRouteBuilder routeBuilder)
@@ -30,6 +29,7 @@ internal static class AppEndpointRegister
             .Produces<Stream>(200, contentType: MediaTypeNames.Application.Octet)
             .ProducesProblem(404);
         fileItemGroup.MapPatch("rename", FileEndpoints.RenameAsync)
+            .ProducesProblem(400)
             .ProducesProblem(404);
         fileItemGroup.MapDelete("", FileEndpoints.DeleteAsync);
     }

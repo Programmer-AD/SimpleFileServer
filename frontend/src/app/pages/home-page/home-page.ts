@@ -36,7 +36,7 @@ export class HomePage {
     protected renamedFileNewName = linkedSignal(() => this.renamedFile()?.name ?? "");
     protected canSaveRename = computed(() => {
         const newNameMaxLength = 250;
-        const invalidChars = /[\"\<\>\|\:\*\?\\\/\t\n\v\f\r]/gm;
+        const validNameRegex = /^(?=\s*\S)[^\\"<>|:*?\\\/\t\n\v\f\r]+$/gm;
 
         const renamedFileOldName = this.renamedFile()?.name;
         const renamedFileNewName = this.renamedFileNewName().trim();
@@ -44,7 +44,7 @@ export class HomePage {
         return renamedFileNewName !== ""
             && renamedFileNewName !== renamedFileOldName
             && renamedFileNewName.length < newNameMaxLength
-            && renamedFileNewName.match(invalidChars) === null;
+            && renamedFileNewName.match(validNameRegex) !== null;
     });
 
     protected async onUploadFileClick() {

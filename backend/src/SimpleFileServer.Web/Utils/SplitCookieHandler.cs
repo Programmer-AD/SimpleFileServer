@@ -5,7 +5,7 @@ namespace SimpleFileServer.Web.Utils;
 
 internal static class SplitCookieHandler
 {
-    private const int SafeCookieSizeLimit = 3500;
+    public const int SafeCookieSizeLimit = 3500;
 
     public static Dictionary<string, string> ToSplitCookies(
         string namePrefix,
@@ -19,6 +19,7 @@ internal static class SplitCookieHandler
         foreach (char[] chunk in base64Value.Chunk(SafeCookieSizeLimit))
         {
             dictionary.Add($"{namePrefix}_{partIndex}", new string(chunk));
+            partIndex++;
         }
 
         dictionary.Add($"{namePrefix}_length", dictionary.Count.ToString());
@@ -26,12 +27,13 @@ internal static class SplitCookieHandler
         return dictionary;
     }
 
-    public static bool TryGetSplitCookieValue(IRequestCookieCollection requestCookies, string namePrefix, [NotNullWhen(true)] out string? value)
+    public static bool TryGetSplitCookieValue(Dictionary<string, string> requestCookies, string namePrefix, [NotNullWhen(true)] out string? value)
     {
         value = null;
 
         if (!requestCookies.TryGetValue($"{namePrefix}_length", out string? rawLength)
-            || !int.TryParse(rawLength, out int length))
+            || !int.TryParse(rawLength, out int length)
+            || length < 0)
         {
             return false;
         }

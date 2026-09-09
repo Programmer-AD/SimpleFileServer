@@ -27,8 +27,7 @@ internal class PresharedSecretAuthenticationHandler : AuthenticationHandler<Pres
 
     private AuthenticateResult HandleAuthenticate()
     {
-        if (!AuthenticationHeaderValue.TryParse(Request.Headers.Authorization, out AuthenticationHeaderValue? authenticationHeader)
-            || authenticationHeader == null)
+        if (!AuthenticationHeaderValue.TryParse(Request.Headers.Authorization, out AuthenticationHeaderValue? authenticationHeader))
         {
             return AuthenticateResult.Fail("Authentication header is not present or has incorrect format.");
         }
@@ -40,7 +39,7 @@ internal class PresharedSecretAuthenticationHandler : AuthenticationHandler<Pres
 
         if (authenticationHeader.Parameter != Options.PresharedSecret)
         {
-            return AuthenticateResult.Fail("Provided secret is incorrect");
+            return AuthenticateResult.Fail("Provided secret is incorrect.");
         }
 
         return AuthenticateResult.Success(CreateAuthenticationTicket([

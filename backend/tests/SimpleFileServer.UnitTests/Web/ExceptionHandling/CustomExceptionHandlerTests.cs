@@ -183,7 +183,6 @@ public class CustomExceptionHandlerTests
         Assert.Equal(expectedStatusCode, httpContext.Response.StatusCode);
     }
 
-
     private ProblemDetailsContext GetProblemDetailsContext(Exception exception, ProblemDetails problemDetails)
         => new()
         {

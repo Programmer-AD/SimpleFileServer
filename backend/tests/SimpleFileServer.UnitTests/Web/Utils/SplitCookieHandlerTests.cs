@@ -109,7 +109,6 @@ public class SplitCookieHandlerTests
         Assert.Empty(resultValue!);
     }
 
-
     [Fact]
     public void TryGetSplitCookieValue_WhenThereIsOnePart_ReturnsCorrectValue()
     {

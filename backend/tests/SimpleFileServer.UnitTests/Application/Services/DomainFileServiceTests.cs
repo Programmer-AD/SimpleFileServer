@@ -17,7 +17,6 @@ public class DomainFileServiceTests
         CreatedAt = DateTime.Parse("2026-09-09T00:00:00"),
     };
 
-
     private readonly Mock<IDomainFileRepository> fileRepositoryMock;
     private readonly Mock<IFileStore> fileStoreMock;
     private readonly Mock<TimeProvider> timeProviderMock;

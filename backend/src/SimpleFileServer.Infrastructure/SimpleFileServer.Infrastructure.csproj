@@ -12,6 +12,7 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="SimpleFileServer.UnitTests" />
+        <InternalsVisibleTo Include="SimpleFileServer.IntegrationTests" />
     </ItemGroup>
 
     <ItemGroup>

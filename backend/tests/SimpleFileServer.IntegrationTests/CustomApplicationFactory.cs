@@ -9,19 +9,29 @@ public sealed class CustomApplicationFactory : WebApplicationFactory<Program>
 
     private readonly string testRunId;
     private readonly string testRunDataLocation;
+    private readonly string testRunDataFileStorageLocation;
 
     public CustomApplicationFactory()
     {
         testRunId = $"{DateTime.UtcNow:yyMMdd_HHmmss}_{Random.Shared.Next(0, ushort.MaxValue):X4}";
         testRunDataLocation = $"./test/{testRunId}";
+        testRunDataFileStorageLocation = $"{testRunDataLocation}/storage";
+
+        if (!Directory.Exists(testRunDataFileStorageLocation))
+        {
+            Directory.CreateDirectory(testRunDataFileStorageLocation);
+        }
     }
+
+    public string GetFileStoragePath(string fileLocation)
+        => $"{testRunDataFileStorageLocation}/{fileLocation}";
 
     protected override void ConfigureWebHost(IWebHostBuilder hostBuilder)
     {
         hostBuilder.ConfigureServices((context, services) =>
         {
             context.Configuration["Infrastructure:Database:ConnectionString"] = $"Data Source={testRunDataLocation}/data.db";
-            context.Configuration["Infrastructure:FileStore:StorageFolderPath"] = $"{testRunDataLocation}/storage";
+            context.Configuration["Infrastructure:FileStore:StorageFolderPath"] = testRunDataFileStorageLocation;
             context.Configuration["Authentication:PresharedSecret"] = TestPresharedSecret;
         });
     }
@@ -37,7 +47,6 @@ public sealed class CustomApplicationFactory : WebApplicationFactory<Program>
 
         // Make sure SQLite is closed, so we can drop its file
         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
-
         if (Directory.Exists(testRunDataLocation))
         {
             Directory.Delete(testRunDataLocation, recursive: true);

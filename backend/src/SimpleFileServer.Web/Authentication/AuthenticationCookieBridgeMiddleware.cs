@@ -8,7 +8,10 @@ internal class AuthenticationCookieBridgeMiddleware : IMiddleware
     {
         // If Authorization header is not provided, get it using cookie bridge (usefule for SPAs to prevent XSS)
         if (context.Request.Headers.Authorization.Count == 0
-            && SplitCookieHandler.TryGetSplitCookieValue(context.Request.Cookies, WebConstants.AuthBridgeCookieName, out string? authValue))
+            && SplitCookieHandler.TryGetSplitCookieValue(
+                context.Request.Cookies.ToDictionary(x => x.Key, x => x.Value),
+                WebConstants.AuthBridgeCookieName,
+                out string? authValue))
         {
             context.Request.Headers.Authorization = authValue;
         }

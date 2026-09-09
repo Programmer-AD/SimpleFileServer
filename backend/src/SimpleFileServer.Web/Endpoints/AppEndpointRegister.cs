@@ -14,9 +14,8 @@ internal static class AppEndpointRegister
 
         MapFileEndpoints(rootGroup);
 
-        RouteGroupBuilder noAuthGroup = app.MapGroup("api")
-            .AllowAnonymous();
-        MapAuthEndpoints(noAuthGroup);
+        RouteGroupBuilder customAuthGroup = app.MapGroup("api");
+        MapAuthEndpoints(customAuthGroup);
     }
 
     private static void MapFileEndpoints(IEndpointRouteBuilder routeBuilder)

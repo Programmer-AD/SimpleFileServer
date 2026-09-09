@@ -151,7 +151,6 @@ public class DomainFileServiceTests
         Stream result = await fileService.GetContentAsync(TestId);
 
         Assert.Equal(expectedStream, result);
-
     }
 
     #endregion
@@ -209,7 +208,6 @@ public class DomainFileServiceTests
 
         fileStoreMock.Verify(x => x.Delete(testFile.FileLocation), Times.Once);
         fileRepositoryMock.Verify(x => x.DeleteAsync(TestId), Times.Once);
-
     }
 
     #endregion

@@ -30,6 +30,7 @@ internal static class AppEndpointRegister
             .Produces<Stream>(200, contentType: MediaTypeNames.Application.Octet)
             .ProducesProblem(404);
         fileItemGroup.MapPatch("rename", FileEndpoints.RenameAsync)
+            .ProducesProblem(400)
             .ProducesProblem(404);
         fileItemGroup.MapDelete("", FileEndpoints.DeleteAsync);
     }

@@ -1,25 +1,23 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Mime;
+using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using SimpleFileServer.Application.Abstractions.Services;
+using SimpleFileServer.Domain;
 using SimpleFileServer.Domain.Entities;
 using SimpleFileServer.Web.Models;
 
 namespace SimpleFileServer.Web.Endpoints;
 
-internal static class FileEndpoints
+internal static partial class FileEndpoints
 {
     // Param has to be IFormFile to be bound, can't be part of model
-    public static async Task<Results<Ok<IdModel>, ValidationProblem>> UploadAsync(IFormFile file, IDomainFileService fileService)
+    public static async Task<Ok<IdModel>> UploadAsync(IFormFile file, IDomainFileService fileService)
     {
         string fileName = file.FileName;
-
-        if (!IsFileNameValid(fileName, out string? validationProblem))
+        if (!GetFileNameRegex().IsMatch(fileName))
         {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]>()
-            {
-                ["fileName"] = [validationProblem],
-            });
+            fileName = GetCleanFileName(fileName);
         }
 
         using Stream fileStream = file.OpenReadStream();
@@ -45,16 +43,8 @@ internal static class FileEndpoints
             fileDownloadName: file.Name);
     }
 
-    public static async Task<Results<NoContent, ValidationProblem>> RenameAsync(Guid id, FileRenameRequest request, IDomainFileService fileService)
+    public static async Task<NoContent> RenameAsync(Guid id, FileRenameRequest request, IDomainFileService fileService)
     {
-        if (!IsFileNameValid(request.NewName, out string? validationProblem))
-        {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]>()
-            {
-                ["fileName"] = [validationProblem],
-            });
-        }
-
         await fileService.RenameAsync(id, request.NewName);
         return TypedResults.NoContent();
     }
@@ -65,22 +55,17 @@ internal static class FileEndpoints
         return TypedResults.NoContent();
     }
 
-    private static bool IsFileNameValid(string fileName, [MaybeNullWhen(true)] out string validationProblem)
+    private static string GetCleanFileName(string fileName)
     {
-        if (string.IsNullOrWhiteSpace(fileName))
+        var fileNameBuilder = new StringBuilder(fileName);
+        foreach (char invalidChar in Path.GetInvalidFileNameChars())
         {
-            validationProblem = "Is empty or contains whitespace only characters.";
-            return false;
+            fileNameBuilder.Replace(invalidChar, '_');
         }
 
-        char[] invalidChars = Path.GetInvalidFileNameChars();
-        if (fileName.ContainsAny(invalidChars))
-        {
-            validationProblem = "Contains invalid characters.";
-            return false;
-        }
-
-        validationProblem = null;
-        return true;
+        return fileNameBuilder.ToString();
     }
+
+    [GeneratedRegex(DomainEntityConstants.DomainFile_Name_Regex)]
+    private static partial Regex GetFileNameRegex();
 }

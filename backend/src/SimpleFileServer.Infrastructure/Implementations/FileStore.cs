@@ -11,8 +11,9 @@ internal class FileStore(
     public async Task<string> StoreAsync(Stream file)
     {
         string location = GetRandomFreeLocation();
+        string path = GetFilePath(location);
 
-        using FileStream stream = File.OpenWrite(location);
+        using FileStream stream = File.OpenWrite(path);
         await file.CopyToAsync(stream);
 
         return location;
@@ -20,27 +21,32 @@ internal class FileStore(
 
     public Stream? GetContent(string location)
     {
-        if (!File.Exists(location))
+        string path = GetFilePath(location);
+        if (!File.Exists(path))
         {
             return null;
         }
 
-        return File.OpenRead(location);
+        return File.OpenRead(path);
     }
 
     public void Delete(string location)
     {
-        File.Delete(location);
+        string path = GetFilePath(location);
+        File.Delete(path);
     }
 
     private string GetRandomFreeLocation()
     {
-        string filePath;
+        string fileLocation;
         do
         {
-            filePath = Path.Combine(options.Value.StorageFolderPath, Path.GetRandomFileName());
-        } while (File.Exists(filePath));
+            fileLocation = Path.GetRandomFileName();
+        } while (File.Exists(GetFilePath(fileLocation)));
 
-        return filePath;
+        return fileLocation;
     }
+
+    private string GetFilePath(string location)
+        => Path.Combine(options.Value.StorageFolderPath, location);
 }

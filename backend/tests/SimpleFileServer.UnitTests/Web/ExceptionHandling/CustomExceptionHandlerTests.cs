@@ -8,6 +8,8 @@ namespace SimpleFileServer.UnitTests.Web.ExceptionHandling;
 
 public class CustomExceptionHandlerTests
 {
+    private const string DomainExceptionDetails = "Test details.";
+
     private readonly Mock<IProblemDetailsWriter> problemDetailsWriterMock;
     private readonly Mock<ILogger<CustomExceptionHandler>> loggerMock;
     private readonly HttpContext httpContext;
@@ -60,106 +62,78 @@ public class CustomExceptionHandlerTests
     [Fact]
     public async Task TryHandleAsync_WhenDomainExceptionTypeIsGenericNotFound_WritesProblem404()
     {
-        const string domainExceptionType = DomainExceptionTypes.GenericNotFound;
-        const string domainExceptionDetails = "Test details.";
-        var exception = new DomainException(domainExceptionType, domainExceptionDetails);
-        ProblemDetailsContext expectedProblem = GetProblemDetailsContext(exception, new ProblemDetails
-        {
-            Status = 404,
-            Type = domainExceptionType,
-            Detail = domainExceptionDetails,
-        });
-
-        ProblemDetailsContext? actualProblem = null;
-        problemDetailsWriterMock
-            .Setup(x => x.WriteAsync(It.IsAny<ProblemDetailsContext>()))
-            .Callback((ProblemDetailsContext problem) => actualProblem = problem);
-
-        await customExceptionHandler.TryHandleAsync(httpContext, exception, CancellationToken.None);
-
-        Assert.Equivalent(expectedProblem, actualProblem);
+        await TestTryHandleAsyncForDomainException(
+            domainExceptionType: DomainExceptionTypes.GenericNotFound,
+            expectedStatusCode: 404);
     }
 
     [Fact]
     public async Task TryHandleAsync_WhenDomainExceptionTypeIsNotFoundSubType_WritesProblem404()
     {
-        const string domainExceptionType = $"{DomainExceptionTypes.GenericNotFound}/subType";
-        const string domainExceptionDetails = "Test details.";
-        var exception = new DomainException(domainExceptionType, domainExceptionDetails);
-        ProblemDetailsContext expectedProblem = GetProblemDetailsContext(exception, new ProblemDetails
-        {
-            Status = 404,
-            Type = domainExceptionType,
-            Detail = domainExceptionDetails,
-        });
-
-        ProblemDetailsContext? actualProblem = null;
-        problemDetailsWriterMock
-            .Setup(x => x.WriteAsync(It.IsAny<ProblemDetailsContext>()))
-            .Callback((ProblemDetailsContext problem) => actualProblem = problem);
-
-        await customExceptionHandler.TryHandleAsync(httpContext, exception, CancellationToken.None);
-
-        Assert.Equivalent(expectedProblem, actualProblem);
+        await TestTryHandleAsyncForDomainException(
+            domainExceptionType: $"{DomainExceptionTypes.GenericNotFound}/subType",
+            expectedStatusCode: 404);
     }
 
     [Fact]
     public async Task TryHandleAsync_WhenDomainExceptionTypeIsGenericAccessDenied_WritesProblem403()
     {
-        const string domainExceptionType = DomainExceptionTypes.GenericAccessDenied;
-        const string domainExceptionDetails = "Test details.";
-        var exception = new DomainException(domainExceptionType, domainExceptionDetails);
-        ProblemDetailsContext expectedProblem = GetProblemDetailsContext(exception, new ProblemDetails
-        {
-            Status = 403,
-            Type = domainExceptionType,
-            Detail = domainExceptionDetails,
-        });
-
-        ProblemDetailsContext? actualProblem = null;
-        problemDetailsWriterMock
-            .Setup(x => x.WriteAsync(It.IsAny<ProblemDetailsContext>()))
-            .Callback((ProblemDetailsContext problem) => actualProblem = problem);
-
-        await customExceptionHandler.TryHandleAsync(httpContext, exception, CancellationToken.None);
-
-        Assert.Equivalent(expectedProblem, actualProblem);
+        await TestTryHandleAsyncForDomainException(
+            domainExceptionType: DomainExceptionTypes.GenericAccessDenied,
+            expectedStatusCode: 403);
     }
 
     [Fact]
     public async Task TryHandleAsync_WhenDomainExceptionTypeIsAccessDeniedSubType_WritesProblem403()
     {
-        const string domainExceptionType = $"{DomainExceptionTypes.GenericAccessDenied}/subType";
-        const string domainExceptionDetails = "Test details.";
-        var exception = new DomainException(domainExceptionType, domainExceptionDetails);
-        ProblemDetailsContext expectedProblem = GetProblemDetailsContext(exception, new ProblemDetails
-        {
-            Status = 403,
-            Type = domainExceptionType,
-            Detail = domainExceptionDetails,
-        });
+        await TestTryHandleAsyncForDomainException(
+            domainExceptionType: $"{DomainExceptionTypes.GenericAccessDenied}/subType",
+            expectedStatusCode: 403);
+    }
 
-        ProblemDetailsContext? actualProblem = null;
-        problemDetailsWriterMock
-            .Setup(x => x.WriteAsync(It.IsAny<ProblemDetailsContext>()))
-            .Callback((ProblemDetailsContext problem) => actualProblem = problem);
+    [Fact]
+    public async Task TryHandleAsync_WhenDomainExceptionTypeIsGenericInvalidAction_WritesProblem400()
+    {
+        await TestTryHandleAsyncForDomainException(
+            domainExceptionType: DomainExceptionTypes.GenericInvalidAction,
+            expectedStatusCode: 400);
+    }
 
-        await customExceptionHandler.TryHandleAsync(httpContext, exception, CancellationToken.None);
-
-        Assert.Equivalent(expectedProblem, actualProblem);
+    [Fact]
+    public async Task TryHandleAsync_WhenDomainExceptionTypeIsGenericInvalidActionSubType_WritesProblem400()
+    {
+        await TestTryHandleAsyncForDomainException(
+            domainExceptionType: $"{DomainExceptionTypes.GenericInvalidAction}/subType",
+            expectedStatusCode: 400);
     }
 
     [Fact]
     public async Task TryHandleAsync_WhenDomainExceptionTypeIsUnknown_WritesProblem500()
     {
-        const string domainExceptionType = "unknownType";
-        const string domainExceptionDetails = "Test details.";
-        var exception = new DomainException(domainExceptionType, domainExceptionDetails);
+        await TestTryHandleAsyncForDomainException(
+            domainExceptionType: "unknownType",
+            expectedStatusCode: 500);
+    }
+
+    [Fact]
+    public async Task TryHandleAsync_UsesProblemStatusCodeForResponse()
+    {
+        var exception = new DomainException(DomainExceptionTypes.GenericAccessDenied, DomainExceptionDetails);
+        const int expectedStatusCode = 403;
+
+        await customExceptionHandler.TryHandleAsync(httpContext, exception, CancellationToken.None);
+
+        Assert.Equal(expectedStatusCode, httpContext.Response.StatusCode);
+    }
+
+    private async Task TestTryHandleAsyncForDomainException(string domainExceptionType, int expectedStatusCode)
+    {
+        var exception = new DomainException(domainExceptionType, DomainExceptionDetails);
         ProblemDetailsContext expectedProblem = GetProblemDetailsContext(exception, new ProblemDetails
         {
-            Status = 500,
+            Status = expectedStatusCode,
             Type = domainExceptionType,
-            Detail = domainExceptionDetails,
+            Detail = DomainExceptionDetails,
         });
 
         ProblemDetailsContext? actualProblem = null;
@@ -170,17 +144,6 @@ public class CustomExceptionHandlerTests
         await customExceptionHandler.TryHandleAsync(httpContext, exception, CancellationToken.None);
 
         Assert.Equivalent(expectedProblem, actualProblem);
-    }
-
-    [Fact]
-    public async Task TryHandleAsync_UsesProblemStatusCodeForResponse()
-    {
-        var exception = new DomainException(DomainExceptionTypes.GenericAccessDenied, "Test details.");
-        const int expectedStatusCode = 403;
-
-        await customExceptionHandler.TryHandleAsync(httpContext, exception, CancellationToken.None);
-
-        Assert.Equal(expectedStatusCode, httpContext.Response.StatusCode);
     }
 
     private ProblemDetailsContext GetProblemDetailsContext(Exception exception, ProblemDetails problemDetails)

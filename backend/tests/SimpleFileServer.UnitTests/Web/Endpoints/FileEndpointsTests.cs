@@ -1,5 +1,4 @@
 using System.Net.Mime;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using SimpleFileServer.Application.Abstractions.Services;
 using SimpleFileServer.Domain.Entities;
@@ -20,40 +19,28 @@ public class FileEndpointsTests
     }
 
     [Fact]
-    public async Task UploadAsync_WhenFileNameContainsInvalidCharacters_ShouldSaveFileWithCleanedName()
+    public async Task RegisterAsync_ShouldRegisterFile()
     {
-        const string originalFileName = "File\"3\"/.txt";
-        const string expectedFileName = "File_3__.txt";
-        using var formFileStream = new MemoryStream([1, 2, 3]);
-        var formFile = new FormFile(formFileStream, 0, formFileStream.Length, "file", originalFileName);
+        const string name = "fileName.txt";
+        const long size = 10201;
 
-        fileServiceMock
-            .Setup(x => x.CreateAsync(expectedFileName, It.Is<Stream>(x => x.Length == formFileStream.Length)))
-            .ReturnsAsync(TestId);
+        await FileEndpoints.RegisterAsync(new(name, size), fileServiceMock.Object);
 
-        Ok<IdModel> result = await FileEndpoints.UploadAsync(formFile, fileServiceMock.Object);
-
-        Assert.Equal(TestId, result.Value?.Id);
+        fileServiceMock.Verify(x => x.RegisterAsync(name, size), Times.Once);
     }
 
     [Fact]
-    public async Task UploadAsync_WhenFileNameIsValid_ShouldSaveFileWithOriginalName()
+    public async Task InitContentAsync_ShouldInitContent()
     {
-        const string fileName = "File3.txt";
-        using var formFileStream = new MemoryStream([1, 2, 3]);
-        var formFile = new FormFile(formFileStream, 0, formFileStream.Length, "file", fileName);
+        using var fileStream = new MemoryStream([1, 2, 3]);
 
-        fileServiceMock
-            .Setup(x => x.CreateAsync(fileName, It.Is<Stream>(x => x.Length == formFileStream.Length)))
-            .ReturnsAsync(TestId);
+        await FileEndpoints.InitContentAsync(TestId, fileStream, fileServiceMock.Object);
 
-        Ok<IdModel> result = await FileEndpoints.UploadAsync(formFile, fileServiceMock.Object);
-
-        Assert.Equal(TestId, result.Value?.Id);
+        fileServiceMock.Verify(x => x.InitContentAsync(TestId, fileStream), Times.Once);
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnAllFiles()
+    public async Task GetAllAsync_ShouldReturnAllFilesInfo()
     {
         fileServiceMock
             .Setup(x => x.GetAllAsync())
@@ -70,17 +57,42 @@ public class FileEndpointsTests
                 {
                     Id = Guid.Parse("788f9a93-a0d3-4d89-a673-000000000002"),
                     Name = "testFile2.txt",
-                    FileLocation = "testLocation2",
+                    FileLocation = null,
                     CreatedAt = DateTime.Parse("2026-09-02T00:00:00"),
                     Size = 102
                 },
             ]);
         var expectedResult = new FileListModel([
-            new (Guid.Parse("788f9a93-a0d3-4d89-a673-000000000001"), "testFile1.txt", 101, DateTime.Parse("2026-09-01T00:00:00")),
-            new (Guid.Parse("788f9a93-a0d3-4d89-a673-000000000002"), "testFile2.txt", 102, DateTime.Parse("2026-09-02T00:00:00")),
+            new (Guid.Parse("788f9a93-a0d3-4d89-a673-000000000001"), "testFile1.txt", 101, DateTime.Parse("2026-09-01T00:00:00"), true),
+            new (Guid.Parse("788f9a93-a0d3-4d89-a673-000000000002"), "testFile2.txt", 102, DateTime.Parse("2026-09-02T00:00:00"), false),
         ]);
 
         Ok<FileListModel> result = await FileEndpoints.GetAllAsync(fileServiceMock.Object);
+
+        Assert.Equivalent(expectedResult, result.Value);
+    }
+
+    [Fact]
+    public async Task GetAsync_ShouldReturnFileInfo()
+    {
+        var createdAt = DateTime.Parse("2026-09-09T00:00:00");
+        var file = new DomainFile()
+        {
+            Id = TestId,
+            Name = "testName.txt",
+            FileLocation = "testlocation",
+            Size = 100,
+            CreatedAt = createdAt,
+        };
+
+        fileServiceMock
+            .Setup(x => x.GetAsync(TestId))
+            .ReturnsAsync(file);
+
+        var expectedResult = new FileInfoModel(TestId, "testName.txt", 100, createdAt, true);
+
+        Ok<FileInfoModel> result = await FileEndpoints.GetAsync(TestId, fileServiceMock.Object);
+
         Assert.Equivalent(expectedResult, result.Value);
     }
 

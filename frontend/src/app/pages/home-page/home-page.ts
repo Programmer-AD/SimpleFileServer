@@ -26,7 +26,7 @@ export class HomePage {
 
         const files = this.fileListResource.value().files.map(file => (<FileRow>{
             ...file,
-            size: (file.size / 1024).toFixed(2) + " KB",
+            size: getFileSizeDisplay(file.size),
             createdAt: new Date(file.createdAt + "Z"),
 
         }));
@@ -122,4 +122,22 @@ interface FileRow {
     size: string,
     createdAt: Date,
     hasContent: boolean,
+}
+
+function getFileSizeDisplay(size: number): string {
+    let degree = Math.min(Math.max(Math.floor(Math.log(size) / Math.log(1024)), 0), 3);
+    let sizeNumber = (size / (1024 ** degree)).toPrecision(3);
+
+    return `${sizeNumber} ${getFileSizeLiteral(degree)}`;
+}
+
+function getFileSizeLiteral(degree: number) {
+    switch (degree) {
+        case 0: return "B";
+        case 1: return "KB";
+        case 2: return "MB";
+        case 3: return "GB";
+    }
+
+    return "?";
 }

@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
-import { FileListModel, FileRenameRequest, IdModel } from "../models";
+import { FileListModel, FileRegisterRequest, FileRenameRequest, IdModel } from "../models";
 import { firstValueFrom } from "rxjs";
 
 @Service()
@@ -9,13 +9,13 @@ export class FileService {
 
     private httpClient = inject(HttpClient);
 
-    public async uploadAsync(fileBlob: Blob): Promise<IdModel> {
-        const formData = new FormData();
-        formData.append("file", fileBlob);
+    public async uploadAsync(registerRequest: FileRegisterRequest, fileContent: Blob): Promise<IdModel> {
 
-        const response = await firstValueFrom(this.httpClient.post<IdModel>(this.baseUrl, formData));
+        const registerResponse = await firstValueFrom(this.httpClient.post<IdModel>(this.baseUrl, registerRequest));
 
-        return response;
+        await firstValueFrom(this.httpClient.post(`${this.baseUrl}/${registerResponse.id}/content`, fileContent));
+
+        return registerResponse;
     }
 
     public async getAllAsync(): Promise<FileListModel> {

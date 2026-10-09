@@ -58,7 +58,10 @@ export class HomePage {
             return;
         }
 
-        await this.fileService.uploadAsync(selectedFile);
+        await this.fileService.uploadAsync({
+            name: selectedFile.name,
+            size: selectedFile.size,
+        }, selectedFile);
 
         this.fileListResource.reload();
     }

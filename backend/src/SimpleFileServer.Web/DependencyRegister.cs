@@ -1,6 +1,7 @@
 using SimpleFileServer.Web.Authentication;
 using SimpleFileServer.Web.ExceptionHandling;
 using SimpleFileServer.Web.HealthChecks;
+using SimpleFileServer.Web.Middlewares;
 
 namespace SimpleFileServer.Web;
 
@@ -28,6 +29,9 @@ public static class DependencyInjection
         services.AddExceptionHandler<CustomExceptionHandler>();
 
         services.AddOpenApi();
+
+        services.AddSingleton<EaseBodySizeLimitMiddlewhere>();
+        services.Configure<EaseBodySizeLimitMiddlewhereOptions>(config.GetSection("Web:FileRequestBodySizeLimit"));
 
         services.AddSingleton<AuthenticationCookieBridgeMiddleware>();
 

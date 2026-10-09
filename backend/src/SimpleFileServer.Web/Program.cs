@@ -7,6 +7,7 @@ using SimpleFileServer.Infrastructure;
 using SimpleFileServer.Web.Authentication;
 using SimpleFileServer.Web.Endpoints;
 using SimpleFileServer.Web.HealthChecks;
+using SimpleFileServer.Web.Middlewares;
 
 namespace SimpleFileServer.Web;
 
@@ -69,6 +70,7 @@ public class Program
         app.UseStatusCodePages();
 
         app.UseRouting();
+        app.UseMiddleware<EaseBodySizeLimitMiddlewhere>();
 
         // Must go before authentication
         app.UseMiddleware<AuthenticationCookieBridgeMiddleware>();

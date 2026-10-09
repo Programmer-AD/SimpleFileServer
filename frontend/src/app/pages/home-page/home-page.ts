@@ -27,7 +27,8 @@ export class HomePage {
         const files = this.fileListResource.value().files.map(file => (<FileRow>{
             ...file,
             size: (file.size / 1024).toFixed(2) + " KB",
-            createdAt: new Date(file.createdAt + "Z")
+            createdAt: new Date(file.createdAt + "Z"),
+
         }));
         return files;
     });
@@ -119,5 +120,6 @@ interface FileRow {
     id: string,
     name: string,
     size: string,
-    createdAt: Date
+    createdAt: Date,
+    hasContent: boolean,
 }

@@ -17,3 +17,7 @@
     border: solid 1px var(--border-color);
     border-radius: 10px;
 }
+
+.no-content-file-row {
+    background-color: var(--error-color);
+}

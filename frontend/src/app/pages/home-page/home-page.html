@@ -15,13 +15,13 @@
             <div>Loading...</div>
             } @else {
             @for (fileRow of fileList(); track fileRow.id){
-            <tr class="row">
+            <tr class="row" [class.no-content-file-row]="!fileRow.hasContent">
                 <td class="align-left">{{ fileRow.name }}</td>
-                <td class="align-right">{{ fileRow.size }}</td>
+                <td class="align-right">{{ fileRow.hasContent ? fileRow.size : "-" }}</td>
                 <td class="align-right">{{ fileRow.createdAt | date : 'HH:mm dd-MM-yyyy' }}</td>
                 <td>
                     <div class="button-container">
-                        <button (click)="onDownloadFileClick(fileRow)">Download</button>
+                        <button (click)="onDownloadFileClick(fileRow)" [disabled]="!fileRow.hasContent">Download</button>
                         <button (click)="onRenameFileClick(fileRow)">Rename</button>
                         <button (click)="onDeleteFileClick(fileRow)">Delete</button>
                     </div>

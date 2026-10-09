@@ -4,7 +4,9 @@ namespace SimpleFileServer.Application.Abstractions.Services;
 
 public interface IDomainFileService
 {
-    Task<Guid> CreateAsync(string name, Stream createFile);
+    Task<Guid> RegisterAsync(string name);
+
+    Task InitContentAsync(Guid id, Stream fileContent);
 
     Task<DomainFile> GetAsync(Guid id);
 

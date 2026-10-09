@@ -11,5 +11,5 @@ public class DomainFile
 
     public required DateTime CreatedAt { get; set; }
 
-    public required string FileLocation { get; set; }
+    public string? FileLocation { get; set; }
 }

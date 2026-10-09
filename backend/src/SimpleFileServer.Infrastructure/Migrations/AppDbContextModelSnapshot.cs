@@ -28,7 +28,6 @@ namespace SimpleFileServer.Infrastructure.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("FileLocation")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT")
                         .HasColumnName("file_location");

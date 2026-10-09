@@ -27,7 +27,7 @@ internal class DomainFileConfig : IEntityTypeConfiguration<DomainFile>
         builder
             .Property(x => x.FileLocation)
             .HasColumnName("file_location")
-            .IsRequired()
+            .HasDefaultValue(null)
             .HasMaxLength(DomainEntityConstants.DomainFile_FileLocation_MaxLength);
 
         builder

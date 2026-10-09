@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
-import { FileListModel, FileRegisterRequest, FileRenameRequest, IdModel } from "../models";
-import { firstValueFrom } from "rxjs";
+import { FileInfoModel, FileListModel, FileRegisterRequest, FileRenameRequest, IdModel } from "../models";
+import { catchError, firstValueFrom, of } from "rxjs";
 
 @Service()
 export class FileService {
@@ -23,12 +23,21 @@ export class FileService {
         return response;
     }
 
-    public async getContentAsync(id: string): Promise<Blob> {
-        const file = await firstValueFrom(this.httpClient.get(`${this.baseUrl}/${id}/content`, {
-            responseType: "blob"
-        }));
+    public async getAsync(id: string): Promise<FileInfoModel | null> {
+        const response = await firstValueFrom(this.httpClient.get<FileInfoModel>(`${this.baseUrl}/${id}`)
+            .pipe(catchError(error => {
+                if (error.status === 404) {
+                    return of(null);
+                } else {
+                    throw error;
+                }
+            })));
 
-        return file;
+        return response;
+    }
+
+    public getContentUrl(id: string): string {
+        return `${this.baseUrl}/${id}/content`;
     }
 
     public async renameAsync(id: string, request: FileRenameRequest): Promise<void> {

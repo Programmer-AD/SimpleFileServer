@@ -67,16 +67,19 @@ export class HomePage {
     }
 
     protected async onDownloadFileClick(fileRow: FileRow) {
-        const blob = await this.fileService.getContentAsync(fileRow.id);
-        const objectUrl = URL.createObjectURL(blob);
+        // Validate file is still here and is accessible
+        const file = await this.fileService.getAsync(fileRow.id);
+        if (file === null) {
+            // Probably the list is out of data.
+            this.fileListResource.reload();
+            return;
+        }
 
         const downloadLink = document.createElement("a");
-        downloadLink.href = objectUrl;
-        downloadLink.download = fileRow.name;
+        downloadLink.href = this.fileService.getContentUrl(fileRow.id);
+        downloadLink.download = file.name;
         downloadLink.target = "_blank";
         downloadLink.click();
-
-        URL.revokeObjectURL(objectUrl);
     }
 
     protected async onRenameFileClick(fileRow: FileRow) {

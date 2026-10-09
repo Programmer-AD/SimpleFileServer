@@ -14,6 +14,7 @@ export class HomePage {
     private fileService = inject(FileService);
 
     protected uploadFileInputRef = viewChild.required<ElementRef<HTMLInputElement>>('uploadFileInput');
+    protected uploadingNow = signal<boolean>(false);
 
     protected fileListResource = resource({
         params: () => null,
@@ -59,12 +60,18 @@ export class HomePage {
             return;
         }
 
-        await this.fileService.uploadAsync({
-            name: selectedFile.name,
-            size: selectedFile.size,
-        }, selectedFile);
+        try {
+            this.uploadingNow.set(true);
 
-        this.fileListResource.reload();
+            await this.fileService.uploadAsync({
+                name: selectedFile.name,
+                size: selectedFile.size,
+            }, selectedFile);
+
+            this.fileListResource.reload();
+        } finally {
+            this.uploadingNow.set(false);
+        }
     }
 
     protected async onDownloadFileClick(fileRow: FileRow) {

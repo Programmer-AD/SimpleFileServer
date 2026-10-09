@@ -70,7 +70,7 @@ public class Program
         app.UseStatusCodePages();
 
         app.UseRouting();
-        app.UseMiddleware<EaseBodySizeLimitMiddlewhere>();
+        app.UseMiddleware<EaseBodySizeLimitMiddleware>();
 
         // Must go before authentication
         app.UseMiddleware<AuthenticationCookieBridgeMiddleware>();

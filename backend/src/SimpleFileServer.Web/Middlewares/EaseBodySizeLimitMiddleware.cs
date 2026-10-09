@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace SimpleFileServer.Web.Middlewares;
 
-internal partial class EaseBodySizeLimitMiddlewhere(IOptions<EaseBodySizeLimitMiddlewhereOptions> options) : IMiddleware
+internal partial class EaseBodySizeLimitMiddleware(IOptions<EaseBodySizeLimitMiddlewareOptions> options) : IMiddleware
 {
     private static readonly Regex[] EasedPathRexes = [
         GetInitFileContentPathRegex(),
@@ -31,7 +31,7 @@ internal partial class EaseBodySizeLimitMiddlewhere(IOptions<EaseBodySizeLimitMi
     private static partial Regex GetInitFileContentPathRegex();
 }
 
-internal class EaseBodySizeLimitMiddlewhereOptions
+internal class EaseBodySizeLimitMiddlewareOptions
 {
     [Required, Range(1024L, long.MaxValue)]
     public long DesiredSizeLimit { get; set; }

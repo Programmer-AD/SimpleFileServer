@@ -30,8 +30,8 @@ public static class DependencyInjection
 
         services.AddOpenApi();
 
-        services.AddSingleton<EaseBodySizeLimitMiddlewhere>();
-        services.AddOptions<EaseBodySizeLimitMiddlewhereOptions>()
+        services.AddSingleton<EaseBodySizeLimitMiddleware>();
+        services.AddOptions<EaseBodySizeLimitMiddlewareOptions>()
             .BindConfiguration("Web:EaseBodySizeLimit")
             .ValidateDataAnnotations()
             .ValidateOnStart();

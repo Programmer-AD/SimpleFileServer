@@ -67,7 +67,7 @@ public sealed class FileEndpointTests : IClassFixture<CustomApplicationFactory>,
         await CreateTestFile();
 
         var expectedResult = new FileListModel([
-            new FileInfoModel(testFile.Id, testFile.Name, testFile.Size, testFile.CreatedAt),
+            new FileInfoModel(testFile.Id, testFile.Name, testFile.Size, testFile.CreatedAt, true),
         ]);
 
         FileListModel result = await fileClient.GetAllAsync();

@@ -13,9 +13,9 @@ internal partial class EaseBodySizeLimitMiddleware(IOptions<EaseBodySizeLimitMid
 
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        IHttpMaxRequestBodySizeFeature bodySizeFeature = context.Features.GetRequiredFeature<IHttpMaxRequestBodySizeFeature>();
+        IHttpMaxRequestBodySizeFeature? bodySizeFeature = context.Features.Get<IHttpMaxRequestBodySizeFeature>();
 
-        if (ShouldBeEased(context.Request.Path))
+        if (bodySizeFeature != null && ShouldBeEased(context.Request.Path))
         {
             // Attribute based approach doesn't allow us to use configs
             bodySizeFeature.MaxRequestBodySize = options.Value.DesiredSizeLimit;

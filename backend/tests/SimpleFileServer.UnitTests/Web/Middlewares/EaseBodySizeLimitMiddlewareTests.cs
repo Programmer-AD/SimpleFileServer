@@ -53,7 +53,15 @@ public class EaseBodySizeLimitMiddlewareTests
 
         await middleware.InvokeAsync(httpContext, _ => Task.CompletedTask);
 
-        Assert.NotEqual(options.DesiredSizeLimit, bodySizeFeatureMock.Object.MaxRequestBodySize);
+        Assert.Null(bodySizeFeatureMock.Object.MaxRequestBodySize);
     }
 
+    [Fact]
+    public async Task InvokeAsync_WhenFeatureIsNotPresent_DoesNotCrash()
+    {
+        httpContext.Request.Path = "/api/files/6652ea55-a762-4f2f-82d7-98a047404aa8/content";
+        httpContext.Features.Set<IHttpMaxRequestBodySizeFeature>(null);
+
+        await middleware.InvokeAsync(httpContext, _ => Task.CompletedTask);
+    }
 }

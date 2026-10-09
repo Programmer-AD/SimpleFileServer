@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
@@ -32,5 +33,6 @@ internal partial class EaseBodySizeLimitMiddlewhere(IOptions<EaseBodySizeLimitMi
 
 internal class EaseBodySizeLimitMiddlewhereOptions
 {
+    [Required, Range(1024L, long.MaxValue)]
     public long DesiredSizeLimit { get; set; }
 }

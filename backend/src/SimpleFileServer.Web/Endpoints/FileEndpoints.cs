@@ -10,7 +10,7 @@ internal static partial class FileEndpoints
 {
     public static async Task<Ok<IdModel>> RegisterAsync(FileRegisterRequest fileRegisterRequest, IDomainFileService fileService)
     {
-        Guid id = await fileService.RegisterAsync(fileRegisterRequest.Name);
+        Guid id = await fileService.RegisterAsync(fileRegisterRequest.Name, fileRegisterRequest.Size);
         return TypedResults.Ok(new IdModel(id));
     }
 

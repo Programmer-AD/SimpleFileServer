@@ -31,7 +31,10 @@ public static class DependencyInjection
         services.AddOpenApi();
 
         services.AddSingleton<EaseBodySizeLimitMiddlewhere>();
-        services.Configure<EaseBodySizeLimitMiddlewhereOptions>(config.GetSection("Web:FileRequestBodySizeLimit"));
+        services.AddOptions<EaseBodySizeLimitMiddlewhereOptions>()
+            .BindConfiguration("Web:EaseBodySizeLimit")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         services.AddSingleton<AuthenticationCookieBridgeMiddleware>();
 

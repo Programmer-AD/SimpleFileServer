@@ -11,14 +11,14 @@ internal class DomainFileService(
     TimeProvider timeProvider
 ) : IDomainFileService
 {
-    public async Task<Guid> RegisterAsync(string name)
+    public async Task<Guid> RegisterAsync(string name, long size)
     {
         var domainFile = new DomainFile
         {
             Name = name,
             CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
             FileLocation = null,
-            Size = 0,
+            Size = size,
         };
 
         Guid id = await domainFileRepository.CreateAsync(domainFile);
@@ -35,10 +35,7 @@ internal class DomainFileService(
                 $"The domain file \"{id}\" content is already initialized.");
         }
 
-        string fileLocation = await fileStore.StoreAsync(fileContent);
-
-        domainFile.Size = fileContent.Length;
-        domainFile.FileLocation = fileLocation;
+        domainFile.FileLocation = await fileStore.StoreAsync(fileContent);
 
         await domainFileRepository.UpdateAsync(domainFile);
     }

@@ -6,7 +6,7 @@ using SimpleFileServer.Web.Models;
 
 namespace SimpleFileServer.Web.Endpoints;
 
-internal static partial class FileEndpoints
+internal static class FileEndpoints
 {
     public static async Task<Ok<IdModel>> RegisterAsync(FileRegisterRequest fileRegisterRequest, IDomainFileService fileService)
     {

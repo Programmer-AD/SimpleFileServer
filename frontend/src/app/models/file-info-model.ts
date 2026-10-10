@@ -3,4 +3,5 @@ export interface FileInfoModel {
     name: string;
     size: number;
     createdAt: string;
+    hasContent: boolean,
 }

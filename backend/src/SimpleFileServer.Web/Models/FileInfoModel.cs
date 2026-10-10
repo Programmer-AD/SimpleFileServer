@@ -6,7 +6,8 @@ public record class FileInfoModel(
     Guid Id,
     string Name,
     long Size,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    bool HasContent
 );
 
 public static class FileInfoModelExtensions
@@ -16,6 +17,7 @@ public static class FileInfoModelExtensions
             Id: domainFile.Id,
             Name: domainFile.Name,
             Size: domainFile.Size,
-            CreatedAt: domainFile.CreatedAt
+            CreatedAt: domainFile.CreatedAt,
+            HasContent: !string.IsNullOrEmpty(domainFile.FileLocation)
         );
 }

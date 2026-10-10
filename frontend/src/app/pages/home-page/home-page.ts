@@ -14,6 +14,7 @@ export class HomePage {
     private fileService = inject(FileService);
 
     protected uploadFileInputRef = viewChild.required<ElementRef<HTMLInputElement>>('uploadFileInput');
+    protected uploadingNow = signal<boolean>(false);
 
     protected fileListResource = resource({
         params: () => null,
@@ -26,8 +27,8 @@ export class HomePage {
 
         const files = this.fileListResource.value().files.map(file => (<FileRow>{
             ...file,
-            size: (file.size / 1024).toFixed(2) + " KB",
-            createdAt: new Date(file.createdAt + "Z")
+            size: getFileSizeDisplay(file.size),
+            createdAt: new Date(file.createdAt + "Z"),
         }));
         return files;
     });
@@ -58,22 +59,34 @@ export class HomePage {
             return;
         }
 
-        await this.fileService.uploadAsync(selectedFile);
+        try {
+            this.uploadingNow.set(true);
 
-        this.fileListResource.reload();
+            await this.fileService.uploadAsync({
+                name: selectedFile.name,
+                size: selectedFile.size,
+            }, selectedFile);
+
+            this.fileListResource.reload();
+        } finally {
+            this.uploadingNow.set(false);
+        }
     }
 
     protected async onDownloadFileClick(fileRow: FileRow) {
-        const blob = await this.fileService.getContentAsync(fileRow.id);
-        const objectUrl = URL.createObjectURL(blob);
+        // Validate file is still here and is accessible (also refreshes cookies)
+        const file = await this.fileService.getAsync(fileRow.id);
+        if (file === null) {
+            // Probably the list is outdated.
+            this.fileListResource.reload();
+            return;
+        }
 
         const downloadLink = document.createElement("a");
-        downloadLink.href = objectUrl;
+        downloadLink.href = this.fileService.getContentUrl(fileRow.id);
         downloadLink.download = fileRow.name;
         downloadLink.target = "_blank";
         downloadLink.click();
-
-        URL.revokeObjectURL(objectUrl);
     }
 
     protected async onRenameFileClick(fileRow: FileRow) {
@@ -113,5 +126,24 @@ interface FileRow {
     id: string,
     name: string,
     size: string,
-    createdAt: Date
+    createdAt: Date,
+    hasContent: boolean,
+}
+
+function getFileSizeDisplay(size: number): string {
+    let degree = Math.min(Math.max(Math.floor(Math.log(size) / Math.log(1024)), 0), 3);
+    let sizeNumber = (size / (1024 ** degree)).toPrecision(3);
+
+    return `${sizeNumber} ${getFileSizeLiteral(degree)}`;
+}
+
+function getFileSizeLiteral(degree: number) {
+    switch (degree) {
+        case 0: return "B";
+        case 1: return "KB";
+        case 2: return "MB";
+        case 3: return "GB";
+    }
+
+    return "?";
 }

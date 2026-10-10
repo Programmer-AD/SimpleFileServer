@@ -4,22 +4,31 @@ namespace SimpleFileServer.IntegrationTests.Clients;
 
 public class FileClient(HttpClient httpClient)
 {
-    public async Task<IdModel> UploadAsync(Stream fileContent, string fileName)
+    public async Task<IdModel> RegisterAsync(string fileName, long fileSize)
     {
-        using var formContent = new MultipartFormDataContent();
-        formContent.Add(new StreamContent(fileContent), "file", fileName);
-
-        HttpResponseMessage response = await httpClient.PostAsync("/api/files", formContent);
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"/api/files", new FileRegisterRequest(fileName, fileSize));
         response.EnsureSuccessStatusCode();
-
         IdModel? result = await response.Content.ReadFromJsonAsync<IdModel>();
         return result!;
+    }
+
+    public async Task InitContentAsync(Guid id, Stream fileContent)
+    {
+        using var streamContent = new StreamContent(fileContent);
+        HttpResponseMessage response = await httpClient.PostAsync($"/api/files/{id}/content", streamContent);
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task<FileListModel> GetAllAsync()
     {
         FileListModel? response = await httpClient.GetFromJsonAsync<FileListModel>("/api/files");
         return response!;
+    }
+
+    public async Task<FileInfoModel?> GetAsync(Guid id)
+    {
+        FileInfoModel? response = await httpClient.GetFromJsonAsync<FileInfoModel>($"/api/files/{id}");
+        return response;
     }
 
     public async Task<Stream> GetContentAsync(Guid id)

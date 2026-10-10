@@ -18,6 +18,4 @@ public class OpenApiEndpointTests : IClassFixture<CustomApplicationFactory>
 
         Assert.NotEmpty(result);
     }
-
-    private record class MiniHealthCheckResult(string OverallStatus);
 }

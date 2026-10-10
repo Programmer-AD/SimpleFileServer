@@ -59,6 +59,11 @@ internal class CustomExceptionHandler(
             return 403;
         }
 
+        if (domainException.TypeName.StartsWith(DomainExceptionTypes.GenericInvalidAction))
+        {
+            return 400;
+        }
+
         return 500;
     }
 }

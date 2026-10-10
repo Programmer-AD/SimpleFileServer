@@ -21,10 +21,15 @@ internal static class AppEndpointRegister
     private static void MapFileEndpoints(IEndpointRouteBuilder routeBuilder)
     {
         RouteGroupBuilder fileGroup = routeBuilder.MapGroup("files");
-        fileGroup.MapPost("", FileEndpoints.UploadAsync);
+        fileGroup.MapPost("", FileEndpoints.RegisterAsync);
         fileGroup.MapGet("", FileEndpoints.GetAllAsync);
 
         RouteGroupBuilder fileItemGroup = fileGroup.MapGroup("{id}");
+        fileItemGroup.MapGet("", FileEndpoints.GetAsync)
+            .ProducesProblem(404);
+        fileItemGroup.MapPost("content", FileEndpoints.InitContentAsync)
+            .ProducesProblem(400)
+            .ProducesProblem(404);
         fileItemGroup.MapGet("content", FileEndpoints.GetContentAsync)
             .Produces<Stream>(200, contentType: MediaTypeNames.Application.Octet)
             .ProducesProblem(404);

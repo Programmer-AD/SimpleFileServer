@@ -33,7 +33,10 @@ internal class FileStore(
     public void Delete(string location)
     {
         string path = GetFilePath(location);
-        File.Delete(path);
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
     }
 
     private string GetRandomFreeLocation()

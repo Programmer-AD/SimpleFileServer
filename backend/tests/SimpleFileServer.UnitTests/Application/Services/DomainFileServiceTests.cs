@@ -8,11 +8,13 @@ namespace SimpleFileServer.UnitTests.Application.Services;
 public class DomainFileServiceTests
 {
     private static readonly Guid TestId = Guid.Parse("788f9a93-a0d3-4d89-a673-dc3efc92909a");
+    private const string TestFileLocation = "testlocation";
+    // Must not be static, so it is isolated between tests
     private readonly DomainFile testFile = new()
     {
         Id = TestId,
         Name = "testName.txt",
-        FileLocation = "testlocation",
+        FileLocation = TestFileLocation,
         Size = 100,
         CreatedAt = DateTime.Parse("2026-09-09T00:00:00"),
     };
@@ -38,37 +40,78 @@ public class DomainFileServiceTests
     #region CreateAsync
 
     [Fact]
-    public async Task CreateAsync_SavesEntity()
+    public async Task RegisterAsync_SavesFileMetadata()
     {
         const string fileName = "newTest.txt";
-        const string fileLocation = "fileLocation";
+        const long fileSize = 12345;
         DateTime creationTime = DateTime.Parse("2026-09-09T00:00:00Z").ToUniversalTime();
-        using var contentStream = new MemoryStream([1, 2, 3]);
 
         timeProviderMock
             .Setup(x => x.GetUtcNow())
             .Returns(creationTime);
 
-        fileStoreMock
-            .Setup(x => x.StoreAsync(contentStream))
-            .ReturnsAsync(fileLocation);
-
-        DomainFile? createdFile = null;
+        DomainFile? registeredFile = null;
         fileRepositoryMock
             .Setup(x => x.CreateAsync(It.IsAny<DomainFile>()))
             .ReturnsAsync(TestId)
-            .Callback((DomainFile file) => createdFile = file);
+            .Callback((DomainFile file) => registeredFile = file);
         var expectedFile = new DomainFile()
         {
             Name = fileName,
-            FileLocation = fileLocation,
+            FileLocation = null,
             CreatedAt = creationTime,
-            Size = 3,
+            Size = fileSize,
         };
 
-        await fileService.CreateAsync(fileName, contentStream);
+        await fileService.RegisterAsync(fileName, fileSize);
 
-        Assert.Equivalent(expectedFile, createdFile);
+        Assert.Equivalent(expectedFile, registeredFile);
+    }
+
+    #endregion
+
+    #region InitContentAsync
+
+    [Fact]
+    public async Task InitContentAsync_WhenFileNotFound_ThrowsDomainException()
+    {
+        SetFileEntityFound(false);
+        using var fileStream = new MemoryStream([1, 2, 3]);
+
+        DomainException exception = await Assert.ThrowsAsync<DomainException>(() => fileService.InitContentAsync(TestId, fileStream));
+
+        Assert.Equal(DomainExceptionTypes.GenericNotFound, exception.TypeName);
+    }
+
+    [Fact]
+    public async Task InitContentAsync_WhenFileAlreadyInited_ThrowsDomainException()
+    {
+        SetFileEntityFound(true);
+        SetFileInited(true);
+        using var fileStream = new MemoryStream([1, 2, 3]);
+
+        DomainException exception = await Assert.ThrowsAsync<DomainException>(() => fileService.InitContentAsync(TestId, fileStream));
+
+        Assert.Equal(DomainExceptionTypes.DomainFile_ContentAlreadyInitialized, exception.TypeName);
+    }
+
+    [Fact]
+    public async Task InitContentAsync_WhenFileIsNotInited_InitsContent()
+    {
+        SetFileEntityFound(true);
+        SetFileInited(false);
+        using var fileStream = new MemoryStream([1, 2, 3]);
+        fileStoreMock
+            .Setup(x => x.StoreAsync(fileStream))
+            .ReturnsAsync(TestFileLocation);
+        DomainFile? updatedFile = null;
+        fileRepositoryMock
+            .Setup(x => x.UpdateAsync(It.IsAny<DomainFile>()))
+            .Callback((DomainFile file) => updatedFile = file);
+
+        await fileService.InitContentAsync(TestId, fileStream);
+
+        Assert.Equal(TestFileLocation, updatedFile?.FileLocation);
     }
 
     #endregion
@@ -127,11 +170,23 @@ public class DomainFileServiceTests
     }
 
     [Fact]
+    public async Task GetContentAsync_WhenFileNotInited_ThrowsDomainException()
+    {
+        SetFileEntityFound(true);
+        SetFileInited(false);
+
+        DomainException exception = await Assert.ThrowsAsync<DomainException>(() => fileService.GetContentAsync(TestId));
+
+        Assert.Equal(DomainExceptionTypes.DomainFile_ContentNotInitialized, exception.TypeName);
+    }
+
+    [Fact]
     public async Task GetContentAsync_WhenFileContentNotFound_ThrowsDomainException()
     {
         SetFileEntityFound(true);
+        SetFileInited(true);
         fileStoreMock
-            .Setup(x => x.GetContent(testFile.FileLocation))
+            .Setup(x => x.GetContent(TestFileLocation))
             .Returns((Stream?)null);
 
         DomainException exception = await Assert.ThrowsAsync<DomainException>(() => fileService.GetContentAsync(TestId));
@@ -143,9 +198,10 @@ public class DomainFileServiceTests
     public async Task GetContentAsync_WhenEverythingFound_ReturnsContent()
     {
         SetFileEntityFound(true);
+        SetFileInited(true);
         using var expectedStream = new MemoryStream([1, 2, 3]);
         fileStoreMock
-            .Setup(x => x.GetContent(testFile.FileLocation))
+            .Setup(x => x.GetContent(TestFileLocation))
             .Returns(expectedStream);
 
         Stream result = await fileService.GetContentAsync(TestId);
@@ -200,13 +256,26 @@ public class DomainFileServiceTests
     }
 
     [Fact]
-    public async Task DeleteAsync_WhenEntityFound_DeletesEntity()
+    public async Task DeleteAsync_WhenFileNotInited_DeletesEntityFromDbOnly()
     {
         SetFileEntityFound(true);
+        SetFileInited(false);
 
         await fileService.DeleteAsync(TestId);
 
-        fileStoreMock.Verify(x => x.Delete(testFile.FileLocation), Times.Once);
+        fileStoreMock.Verify(x => x.Delete(It.IsAny<string>()), Times.Never);
+        fileRepositoryMock.Verify(x => x.DeleteAsync(TestId), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_WhenFileInited_DeletesEntity()
+    {
+        SetFileEntityFound(true);
+        SetFileInited(true);
+
+        await fileService.DeleteAsync(TestId);
+
+        fileStoreMock.Verify(x => x.Delete(TestFileLocation), Times.Once);
         fileRepositoryMock.Verify(x => x.DeleteAsync(TestId), Times.Once);
     }
 
@@ -219,6 +288,11 @@ public class DomainFileServiceTests
         fileRepositoryMock
             .Setup(x => x.GetAsync(TestId))
             .ReturnsAsync(isFound ? testFile : null);
+    }
+
+    private void SetFileInited(bool isInited)
+    {
+        testFile.FileLocation = isInited ? TestFileLocation : null;
     }
 
     #endregion

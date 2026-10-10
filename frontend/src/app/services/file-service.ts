@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
-import { FileListModel, FileRenameRequest, IdModel } from "../models";
-import { firstValueFrom } from "rxjs";
+import { FileInfoModel, FileListModel, FileRegisterRequest, FileRenameRequest, IdModel } from "../models";
+import { catchError, firstValueFrom, of } from "rxjs";
 
 @Service()
 export class FileService {
@@ -9,13 +9,13 @@ export class FileService {
 
     private httpClient = inject(HttpClient);
 
-    public async uploadAsync(fileBlob: Blob): Promise<IdModel> {
-        const formData = new FormData();
-        formData.append("file", fileBlob);
+    public async uploadAsync(registerRequest: FileRegisterRequest, fileContent: Blob): Promise<IdModel> {
 
-        const response = await firstValueFrom(this.httpClient.post<IdModel>(this.baseUrl, formData));
+        const registerResponse = await firstValueFrom(this.httpClient.post<IdModel>(this.baseUrl, registerRequest));
 
-        return response;
+        await firstValueFrom(this.httpClient.post(`${this.baseUrl}/${registerResponse.id}/content`, fileContent));
+
+        return registerResponse;
     }
 
     public async getAllAsync(): Promise<FileListModel> {
@@ -23,12 +23,21 @@ export class FileService {
         return response;
     }
 
-    public async getContentAsync(id: string): Promise<Blob> {
-        const file = await firstValueFrom(this.httpClient.get(`${this.baseUrl}/${id}/content`, {
-            responseType: "blob"
-        }));
+    public async getAsync(id: string): Promise<FileInfoModel | null> {
+        const response = await firstValueFrom(this.httpClient.get<FileInfoModel>(`${this.baseUrl}/${id}`)
+            .pipe(catchError(error => {
+                if (error.status === 404) {
+                    return of(null);
+                } else {
+                    throw error;
+                }
+            })));
 
-        return file;
+        return response;
+    }
+
+    public getContentUrl(id: string): string {
+        return `${this.baseUrl}/${id}/content`;
     }
 
     public async renameAsync(id: string, request: FileRenameRequest): Promise<void> {

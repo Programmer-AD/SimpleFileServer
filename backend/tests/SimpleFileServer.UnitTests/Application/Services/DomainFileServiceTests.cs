@@ -180,7 +180,6 @@ public class DomainFileServiceTests
         Assert.Equal(DomainExceptionTypes.DomainFile_ContentNotInitialized, exception.TypeName);
     }
 
-
     [Fact]
     public async Task GetContentAsync_WhenFileContentNotFound_ThrowsDomainException()
     {

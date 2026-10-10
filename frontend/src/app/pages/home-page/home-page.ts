@@ -29,7 +29,6 @@ export class HomePage {
             ...file,
             size: getFileSizeDisplay(file.size),
             createdAt: new Date(file.createdAt + "Z"),
-
         }));
         return files;
     });
@@ -75,17 +74,17 @@ export class HomePage {
     }
 
     protected async onDownloadFileClick(fileRow: FileRow) {
-        // Validate file is still here and is accessible
+        // Validate file is still here and is accessible (also refreshes cookies)
         const file = await this.fileService.getAsync(fileRow.id);
         if (file === null) {
-            // Probably the list is out of data.
+            // Probably the list is outdated.
             this.fileListResource.reload();
             return;
         }
 
         const downloadLink = document.createElement("a");
         downloadLink.href = this.fileService.getContentUrl(fileRow.id);
-        downloadLink.download = file.name;
+        downloadLink.download = fileRow.name;
         downloadLink.target = "_blank";
         downloadLink.click();
     }
